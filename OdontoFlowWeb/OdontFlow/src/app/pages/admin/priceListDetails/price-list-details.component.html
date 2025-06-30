@@ -1,0 +1,100 @@
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <div class="w-full flex justify-center mr-5">
+            <h5 class="m-0">Detalle Lista / Producto</h5>
+          </div>  
+        <div>
+            <p-select [(ngModel)]="selectedPlan"
+            (onChange)="changePlanEvent($event.value)"
+            [options]="plans()" optionLabel="name" placeholder="Selecciona un plan"
+                inputId="priceListId" fluid>
+                <ng-template let-item pTemplate="item">
+                    <div class="p-d-flex p-jc-between">
+                        <span>{{ item.name }}</span>
+                        <span class="text-muted ml-2">({{ item.discount }}% descuento)</span>
+                    </div>
+                </ng-template>
+            </p-select>
+        </div> 
+      
+    </ng-template>
+    <ng-template #end>
+        <p-button label="Agregar Producto" [disabled]="!selectedPlan" icon="pi pi-plus" severity="secondary"
+            class="mr-2" (onClick)="openNew()" />
+        <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+    </ng-template>
+</p-toolbar>
+
+<div class="grid grid-cols-12 gap-4 mt-8">
+    <div class="col-span-12  ">
+        <p-card>
+            <p-table #dt [value]="entities" [rows]="10" [columns]="cols" [paginator]="true"
+                [globalFilterFields]="['name', 'status']" 
+                scrollable="true"
+                [scrollHeight]="scrollHeight"
+                [(selection)]="selectedEntities" [rowHover]="true" dataKey="id"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entities"
+                [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 20, 30]">
+                <ng-template #caption>
+                    <div class="flex items-center justify-between">
+                        <p-button label="Borrar Filtros" [outlined]="true" icon="pi pi-filter-slash"
+                            (click)="clear(dt)" />
+
+                        <p-iconfield>
+                            <p-inputicon styleClass="pi pi-search" />
+                            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)"
+                                placeholder="Search..." />
+                        </p-iconfield>
+                    </div>
+                </ng-template>
+                <ng-template #header>
+                    <tr> 
+                        <th pSortableColumn="product.name" style="min-width:16rem">
+                            Producto
+                            <p-sortIcon field="product.name" />
+                            <p-columnFilter type="text" field="product.name" display="menu" />
+                        </th>
+                        <th pSortableColumn="product.price" style="min-width: 8rem">
+                            Precio Producto
+                            <p-sortIcon field="product.price" />
+                            <p-columnFilter type="numeric" field="product.price" display="menu" currency="USD" />
+                        </th>
+                        <th pSortableColumn="price" style="min-width: 8rem">
+                            Precio Lista
+                            <p-sortIcon field="price" />
+                            <p-columnFilter type="numeric" field="price" display="menu" currency="USD" />
+                        </th>
+                        <th pSortableColumn="comments" style="min-width: 8rem">
+                            Comentarios
+                        </th>
+                        <th style="min-width: 12rem"></th>
+                    </tr>
+                </ng-template>
+                <ng-template #body let-entity>
+                    <tr> 
+                        <td><strong> {{ entity.product.name }}</strong></td>
+                        <td> <strong> {{ entity.product.price | currency }} </strong></td>
+                        <td><strong> {{ entity.price | currency }}  </strong></td>
+                        <td>{{ entity.comments }}</td>
+                        <td>
+                            <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true"
+                                (click)="editEntity(entity)" />
+                            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
+                                (click)="deleteEntity(entity)" />
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-card>
+    </div>
+</div>
+
+<app-price-list-detail-modal 
+    [showDialog]="showDialog" 
+    [plan]="selectedPlan" 
+    [products]="products"
+    [entity]="entity" (onClose)="onClose()"
+    (onSave)="onSave($event)">
+</app-price-list-detail-modal>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

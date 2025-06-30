@@ -1,0 +1,400 @@
+<p-dialog [(visible)]="showDialog" [style]="{ width: '850px' }" [closeOnEscape]="false" (onHide)="closeClick()"
+  header="Detalles del Cliente" [modal]="true">
+  <form [formGroup]="form" class="p-fluid">
+    <p-tabs value="0">
+      <p-tablist>
+        <p-tab value="0">Contacto
+          <ng-container *ngIf="invalidContactCount > 0">
+            <span
+              class="ml-2 inline-flex items-center justify-center text-xs font-bold text-white bg-red-500 rounded-full w-5 h-5">
+              {{ invalidContactCount }}
+            </span>
+          </ng-container>
+        </p-tab>
+        <p-tab value="1">Facturación
+          <ng-container *ngIf="invalidInvoiceCount > 0">
+            <span
+              class="ml-2 inline-flex items-center justify-center text-xs font-bold text-white bg-red-500 rounded-full w-5 h-5">
+              {{ invalidInvoiceCount }}
+            </span>
+          </ng-container>
+        </p-tab>
+      </p-tablist>
+      <p-tabpanels>
+        <!-- Panel Contacto -->
+        <p-tabpanel value="0">
+          <div class="flex flex-col gap-2">
+
+            <div>
+              <label for="nombre" class="block font-bold mb-3">Nombre <small class="text-red-500">*</small> :</label>
+              <input id="nombre" type="text"
+                [ngClass]="name?.errors && (name?.touched || name?.dirty) ? 'ng-invalid ng-dirty' : ''" pInputText
+                formControlName="name" autofocus fluid />
+              <small class="text-red-500" *ngIf="name?.errors && (name?.touched || name?.dirty)">
+                <ng-container *ngIf="name?.hasError('required')">Este campo es obligatorio.</ng-container>
+                <ng-container *ngIf="name?.hasError('minlength')">Mínimo {{ name?.errors?.['minlength']?.requiredLength
+                  }} caracteres.</ng-container>
+              </small>
+            </div>
+
+            <div>
+              <label for="address" class="block font-bold mb-3">Direccion <small class="text-red-500">*</small>
+                :</label>
+              <textarea id="address"
+                [ngClass]="address?.errors && (address?.touched || address?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                pTextarea formControlName="address" rows="3" cols="20" fluid></textarea>
+              <small class="text-red-500" *ngIf="address?.errors && (address?.touched || address?.dirty)">
+                <ng-container *ngIf="address?.hasError('required')">Este campo es obligatorio.</ng-container>
+              </small>
+            </div>
+
+            <div>
+              <label for="address" class="block font-bold mb-3">Contacto <small class="text-red-500">*</small> :</label>
+              <input id="contact" type="text"
+                [ngClass]="contact?.errors && (contact?.touched || contact?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                pInputText formControlName="contact" autofocus fluid />
+              <small class="text-red-500" *ngIf="contact?.errors && (contact?.touched || contact?.dirty)">
+                <ng-container *ngIf="contact?.hasError('required')">Este campo es obligatorio.</ng-container>
+              </small>
+            </div>
+
+            <div class="grid grid-cols-12 gap-4">
+              <div class="col-span-6">
+                <span class="block font-bold mb-3">Teléfono <small class="text-red-500">*</small> :</span>
+                <input id="phone1" type="tel"
+                  [ngClass]="phone?.errors && (phone?.touched || phone?.dirty) ? 'ng-invalid ng-dirty' : ''" pInputText
+                  pInputText formControlName="phone1" fluid />
+                <small class="text-red-500" *ngIf="phone?.errors && (phone?.touched || phone?.dirty)">
+                  <ng-container *ngIf="phone?.hasError('required')">Este campo es obligatorio.</ng-container>
+                </small>
+              </div>
+              <div class="col-span-6">
+                <span class="block font-bold mb-3">Celular :</span>
+                <input id="mobile" type="tel" pInputText formControlName="mobile" fluid />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-12 gap-4">
+              <div class="col-span-6">
+                <span class="block font-bold mb-3">Correo <small class="text-red-500">*</small>:</span>
+                <input id="generalEmail" type="email"
+                  [ngClass]="email?.errors && (email?.touched || email?.dirty) ? 'ng-invalid ng-dirty' : ''" pInputText
+                  pInputText formControlName="generalEmail" fluid />
+                <small class="text-red-500" *ngIf="email?.errors && (email?.touched || email?.dirty)">
+                  <ng-container *ngIf="email?.hasError('required')">Este campo es obligatorio.</ng-container>
+                  <ng-container *ngIf="email?.hasError('email')">El correo debe ser un correo valido.</ng-container>
+                </small>
+              </div>
+              <div class="col-span-6">
+                <span class="block font-bold mb-3">Correo Adicional :</span>
+                <input id="mobile" type="email" pInputText formControlName="mobile" fluid />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-12 gap-4 mb-3">
+              <div class="col-span-6">
+                <span class="block font-bold mb-3">Representante de Ventas:</span>
+              
+                <p-autocomplete inputId="employeeId" 
+                 formControlName="employeeId" fluid 
+                 optionLabel="name" 
+                 optionValue="id"
+                 [suggestions]="filteredEmployee" (completeMethod)="filterEmployee($event)" optionLabel="name">
+                  <ng-template let-employe #item>
+                      <div class="flex items-center gap-2">
+                              <div>{{ employe.name }}  </div>
+                      </div>
+                  </ng-template>
+                  <ng-template #header>
+                      <div class="font-medium px-3 py-2">Representantes Disponibles</div>
+                  </ng-template>
+                  <ng-template #footer>
+                      <div class="px-3 py-3">
+                          <p-button label="Agregar Representante" (click)="showEmployeeDialog = true"
+                           fluid severity="secondary" text size="small" icon="pi pi-plus" />
+                      </div>
+                  </ng-template>
+                  <ng-template pTemplate="empty">
+                    <div class="px-3 py-2 text-gray-500">Sin resultados o sin representantes disponibles.</div>
+                  </ng-template>
+               </p-autocomplete>
+              </div>
+              <div class="col-span-6">
+                <label for="name" class="block font-bold mb-3">% comission <small class="text-red-500">*</small>:</label>
+                <p-inputNumber formControlName="commissionPercentage" mode="decimal" [minFractionDigits]="0"
+                  [maxFractionDigits]="2" [min]="0" [max]="100" [useGrouping]="false"
+                  [ngClass]="commissionPercentage?.invalid && (commissionPercentage?.touched || commissionPercentage?.dirty) ? 'ng-invalid ng-dirty' : ''" />
+                <small class="text-red-500"
+                  *ngIf="commissionPercentage?.invalid && (commissionPercentage?.touched || commissionPercentage?.dirty)">
+                  <ng-container *ngIf="commissionPercentage?.hasError('min')">No puede ser menor a 0%</ng-container>
+                  <ng-container *ngIf="commissionPercentage?.hasError('max')">No puede ser mayor a 100%</ng-container>
+                </small>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-12 gap-4">
+              <div class="col-span-6">
+                <span class="block font-bold mb-3">Lista Precio <small class="text-red-500">*</small>:</span>
+                <p-select [options]="priceList" appendTo="body"
+                  [ngClass]="priceListId?.errors && (priceListId?.touched || priceListId?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                  formControlName="priceListId" optionLabel="name" optionValue="id" placeholder="Selecciona un plan"
+                  inputId="priceListId" fluid> </p-select>
+                <small class="text-red-500" *ngIf="priceListId?.errors && (priceListId?.touched || priceListId?.dirty)">
+                  <ng-container *ngIf="priceListId?.hasError('required')">Este campo es obligatorio.</ng-container>
+                </small>
+              </div>
+              <div class="col-span-6">
+                <label for="name" class="block font-bold mb-3">Credito <small class="text-red-500">*</small>:</label>
+                <p-inputNumber id="credit" formControlName="credit"
+                  [ngClass]="credit?.errors && (credit?.touched || credit?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                  mode="currency" currency="MXN" locale="es-MX" fluid />
+                <small class="text-red-500" *ngIf="credit?.errors && (credit?.touched || credit?.dirty)">
+                  <ng-container *ngIf="credit?.hasError('required')">Este campo es obligatorio.</ng-container>
+                  <ng-container *ngIf="credit?.hasError('min')">Este campo es obligatorio.</ng-container>
+                  <ng-container *ngIf="credit?.hasError('max')">El máximo de limite de credito es de
+                    $60,000.00</ng-container>
+                </small>
+              </div>
+
+            </div>
+
+            <div class="grid grid-cols-12 gap-4 mr-2">
+              <div class="col-span-6">
+          
+                <span class="block font-bold mb-3">Categoría <small class="text-red-500">*</small>:</span>
+                <div class="grid grid-cols-12 gap-2">
+                  <div *ngFor="let cat of categories" class="flex items-center gap-2 col-span-6">
+                    <p-radioButton [inputId]="cat.value" name="groupId" [value]="cat.value" formControlName="groupId" />
+                    <label [for]="cat.value">{{ cat.label }}</label>
+                  </div>
+                </div>
+              </div>  
+
+              <div class="col-span-6">
+                <span class="block font-bold mb-3">Aplica Factura <small class="text-red-500">*</small>:</span>
+                <div class="grid grid-cols-12 gap-2">
+                  <div *ngFor="let cat of factura" class="flex items-center gap-2 col-span-6">
+                    <p-radioButton [inputId]="cat.value" name="appliesInvoice" [value]="cat.value"
+                      formControlName="appliesInvoice" />
+                    <label [for]="cat.value">{{ cat.label }}</label>
+                  </div>
+                </div>
+              </div>
+            
+            </div>
+            
+            <div class="grid grid-cols-12 gap-4 mr-2">
+              <div class="col-span-6 mt-5">
+                <div class="col-span-6">
+                  <label for="name" class="block font-bold  mr-5">Activo :
+                    <p-toggleswitch formControlName="active" class=" ml-5 mt-4" /></label>
+                </div>
+              </div>
+              </div>
+        
+          </div>
+
+        </p-tabpanel>
+        <p-tabpanel value="1">
+
+          <div class="flex flex-col gap-6" formGroupName="clientInvoice">
+
+            <!-- RAZÓN SOCIAL -->
+            <div>
+              <label for="invoiceName" class="block font-bold mb-3">
+                Razón Social <small class="text-red-500" *ngIf="appliesInvoice?.value === 'true'"> *</small> :
+              </label>
+              <input id="invoiceName" pInputText type="text" formControlName="invoiceName"
+                [ngClass]="invoiceName?.errors && (invoiceName?.touched || invoiceName?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                fluid />
+              <small class="text-red-500" *ngIf="invoiceName?.errors && (invoiceName?.touched || invoiceName?.dirty)  ">
+                <ng-container *ngIf="invoiceName?.hasError('required')">Este campo es obligatorio.</ng-container>
+              </small>
+            </div>
+
+            <!-- RFC + EMAIL -->
+            <div class="grid grid-cols-12 gap-4 mr-2">
+              <div class="col-span-6">
+                <label for="invoiceRFC" class="block font-bold mb-3">
+                  RFC <small class="text-red-500" *ngIf="appliesInvoice?.value === 'true'"> *</small> :
+                </label>
+                <input id="invoiceRFC" pInputText formControlName="invoiceRFC"
+                  [ngClass]="invoiceRFC?.errors && (invoiceRFC?.touched || invoiceRFC?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                  fluid />
+                <small class="text-red-500" *ngIf="invoiceRFC?.errors && (invoiceRFC?.touched || invoiceRFC?.dirty)  ">
+                  <ng-container *ngIf="invoiceRFC?.hasError('required')">Este campo es obligatorio.</ng-container>
+                  <ng-container *ngIf="invoiceRFC?.hasError('pattern')">RFC inválido.</ng-container>
+                </small>
+              </div>
+
+              <div class="col-span-6">
+                <label for="invoiceEmail" class="block font-bold mb-3">
+                  Email <small class="text-red-500" *ngIf="appliesInvoice?.value === 'true'"> *</small>
+                </label>
+                <input id="invoiceEmail" pInputText formControlName="invoiceEmail"
+                  [ngClass]="invoiceEmail?.errors && (invoiceEmail?.touched || invoiceEmail?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                  fluid />
+                <small class="text-red-500"
+                  *ngIf="invoiceEmail?.errors && (invoiceEmail?.touched || invoiceEmail?.dirty) && appliesInvoice?.value === 'true'">
+                  <ng-container *ngIf="invoiceEmail?.hasError('required')">Este campo es obligatorio.</ng-container>
+                  <ng-container *ngIf="invoiceEmail?.hasError('email')">Correo inválido.</ng-container>
+                </small>
+              </div>
+            </div>
+
+            <!-- CFDI & RÉGIMEN -->
+            <div class="grid grid-cols-12 gap-4 mr-2">
+              <div class="col-span-6">
+                <label for="cfdiUse" class="block font-bold mb-3">
+                  Uso CFDI <small class="text-red-500" *ngIf="appliesInvoice?.value === 'true'"> *</small> :
+                </label>
+                <p-select [options]="usosCFDI" formControlName="cfdiUse" optionLabel="descripcion" appendTo="body"
+                [ngClass]="cfdiUse?.errors && (cfdiUse?.touched || cfdiUse?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                optionValue="clave" appendTo="body"
+                  placeholder="Selecciona un uso de CFDI" inputId="cfdiUse" fluid></p-select>
+                <small class="text-red-500"
+                  *ngIf="cfdiUse?.errors && (cfdiUse?.touched || cfdiUse?.dirty) ">
+                  <ng-container *ngIf="cfdiUse?.hasError('required')">Este campo es obligatorio.</ng-container>
+                </small>
+              </div>
+
+              <div class="col-span-6">
+                <label for="regimen" class="block font-bold mb-3">
+                  Régimen Fiscal <small class="text-red-500" *ngIf="appliesInvoice?.value === 'true'"> *</small> :
+                </label>
+                <p-select [options]="regimenesFiscales" appendTo="body"
+                [ngClass]="regimen?.errors && (regimen?.touched || regimen?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                formControlName="regimen" optionLabel="descripcion"
+                  optionValue="clave" placeholder="Selecciona un régimen fiscal" inputId="regimen" fluid></p-select>
+                <small class="text-red-500"
+                  *ngIf="regimen?.errors && (regimen?.touched || regimen?.dirty)  ">
+                  <ng-container *ngIf="regimen?.hasError('required')">Este campo es obligatorio.</ng-container>
+                </small>
+              </div>
+            </div>
+
+            <!-- DIRECCIÓN -->
+            <div class="grid grid-cols-12 gap-4 mr-2">
+              <div class="col-span-6">
+                <label for="street" class="block font-bold mb-3">
+                  Dirección <small class="text-red-500" *ngIf="appliesInvoice?.value === 'true'"> *</small> :
+                </label>
+                <input id="street" pInputText formControlName="street"
+                [ngClass]="street?.errors && (street?.touched || street?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                fluid />
+                <small class="text-red-500"
+                *ngIf="street?.errors && (street?.touched || street?.dirty)  ">
+                <ng-container *ngIf="street?.hasError('required')">Este campo es obligatorio.</ng-container>
+              </small>
+              </div>
+              <div class="col-span-3">
+                <label for="exteriorNumber" class="block font-bold mb-3">
+                  Num Ext <small class="text-red-500" *ngIf="appliesInvoice?.value === 'true'"> *</small> :
+                </label>
+                <input id="exteriorNumber"
+                [ngClass]="exteriorNumber?.errors && (exteriorNumber?.touched || exteriorNumber?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                pInputText formControlName="exteriorNumber" fluid />
+                <small class="text-red-500"
+                *ngIf="exteriorNumber?.errors && (exteriorNumber?.touched || exteriorNumber?.dirty)  ">
+                <ng-container *ngIf="exteriorNumber?.hasError('required')">Este campo es obligatorio.</ng-container>
+              </small>
+              </div>
+              <div class="col-span-3">
+                <label for="interiorNumber" class="block font-bold mb-3">
+                  Num Int:
+                </label>
+                <input id="interiorNumber" pInputText formControlName="interiorNumber" fluid />
+              </div>
+            </div>
+
+            <!-- COLONIA, MUNICIPIO, CP -->
+            <div class="grid grid-cols-12 gap-4 mr-2">
+              <div class="col-span-4">
+                <label for="city" class="block font-bold mb-3">
+                  Colonia <small class="text-red-500" *ngIf="appliesInvoice?.value === 'true'"> *</small> :
+                </label>
+                <input id="city"
+                [ngClass]="city?.errors && (city?.touched || city?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                pInputText formControlName="city" fluid />
+                <small class="text-red-500"
+                *ngIf="city?.errors && (city?.touched || city?.dirty)  ">
+                <ng-container *ngIf="city?.hasError('required')">Este campo es obligatorio.</ng-container>
+              </small>
+              </div>
+              <div class="col-span-4">
+                <label for="municipality" class="block font-bold mb-3">
+                  Municipio <small class="text-red-500" *ngIf="appliesInvoice?.value === 'true'"> *</small> :
+                </label>
+                <input id="municipality" 
+                [ngClass]="municipality?.errors && (municipality?.touched || municipality?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                pInputText formControlName="municipality" fluid />
+                <small class="text-red-500"
+                *ngIf="municipality?.errors && (municipality?.touched || municipality?.dirty)  ">
+                <ng-container *ngIf="municipality?.hasError('required')">Este campo es obligatorio.</ng-container>
+              </small>
+              </div>
+              <div class="col-span-4">
+                <label for="zipCode" class="block font-bold mb-3">
+                  Código Postal <small class="text-red-500" *ngIf="appliesInvoice?.value === 'true'"> *</small> :
+                </label>
+                <input id="zipCode" pInputText formControlName="zipCode"
+                  [ngClass]="zipCode?.errors && (zipCode?.touched || zipCode?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                  fluid />
+                <small class="text-red-500"
+                  *ngIf="zipCode?.errors && (zipCode?.touched || zipCode?.dirty)">
+                  <ng-container *ngIf="zipCode?.hasError('required')">Este campo es obligatorio.</ng-container>
+                  <ng-container *ngIf="zipCode?.hasError('pattern')">Debe contener 5 dígitos.</ng-container>
+                </small>
+              </div>
+            </div>
+
+            <!-- ESTADO Y PAÍS -->
+            <div class="grid grid-cols-12 gap-4 mr-2">
+              <div class="col-span-6">
+                <label for="state" class="block font-bold mb-3">
+                  Estado <small class="text-red-500" *ngIf="appliesInvoice?.value === 'true'"> *</small> :
+                </label>
+                <input id="state"
+                [ngClass]="state?.errors && (state?.touched || state?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                 pInputText formControlName="state" fluid />
+                 <small class="text-red-500"
+                 *ngIf="state?.errors && (state?.touched || state?.dirty)  ">
+                 <ng-container *ngIf="state?.hasError('required')">Este campo es obligatorio.</ng-container>
+               </small>
+              </div>
+              <div class="col-span-6">
+                <label for="country" class="block font-bold mb-3">
+                  País <small class="text-red-500" *ngIf="appliesInvoice?.value === 'true'"> *</small> :
+                </label>
+                <input id="country" 
+                [ngClass]="country?.errors && (country?.touched || country?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                pInputText formControlName="country" fluid />
+                <small class="text-red-500"
+                *ngIf="country?.errors && (country?.touched || country?.dirty)  ">
+                <ng-container *ngIf="country?.hasError('required')">Este campo es obligatorio.</ng-container>
+              </small>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="flex flex-col gap-6 mt-4">
+            <div>
+              <label for="bankDetails" class="block font-bold mb-3">Comentarios :</label>
+              <textarea id="remarks" pTextarea formControlName="remarks" rows="4" cols="20" fluid></textarea>
+            </div>
+          </div>
+
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </form>
+  <ng-template #footer>
+    <p-button label="Cancelar" icon="pi pi-times" text (click)="closeClick()" />
+    <p-button label="Guardar" icon="pi pi-check"   (click)="saveClick()" />
+  </ng-template>
+</p-dialog>
+
+<app-employee-modal  [showDialog]="showEmployeeDialog" 
+ (onClose)="onEmployeeClose()"
+    (onSave)="onEmployeeSave($event)"></app-employee-modal>

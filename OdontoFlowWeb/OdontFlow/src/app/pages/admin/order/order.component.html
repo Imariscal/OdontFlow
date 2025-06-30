@@ -1,0 +1,252 @@
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <div class="w-full flex justify-center">
+      <h5 class="m-0">Detalle Órdenes</h5>
+    </div>
+  </ng-template>
+  <ng-template #end>
+    <p-button label="Nuevo" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+  </ng-template>
+</p-toolbar>
+
+<div class="grid grid-cols-12 gap-4 mt-8">
+  <div class="col-span-12">
+    <p-card>
+      <p-table
+        #dt
+        [value]="entities()"
+        [lazy]="true"
+        (onLazyLoad)="loadEntitiesLazy($event)"
+        [paginator]="true"
+        [rows]="50"
+        [totalRecords]="totalRecords"
+        [loading]="loading"
+        [columns]="cols"
+        [rowsPerPageOptions]="[50, 100, 150, 200]"
+        [globalFilterFields]="['name', 'barcode']"
+        scrollable="true"
+        [scrollHeight]="scrollHeight"
+        [(selection)]="selectedEntities"
+        [rowHover]="true"
+        dataKey="id"
+        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} órdenes"
+        [showCurrentPageReport]="true"
+      >
+        <ng-template #caption>
+          <div class="flex items-center justify-between">
+            <p-button label="Borrar Filtros" [outlined]="true" icon="pi pi-filter-slash" (click)="clear(dt)" />
+            <p-iconfield>
+              <p-inputicon styleClass="pi pi-search" />
+              <input
+                pInputText
+                type="text"
+                (input)="onGlobalFilter(dt, $event)"
+                placeholder="Buscar..."
+              />
+            </p-iconfield>
+          </div>
+        </ng-template>
+
+        <ng-template #header>
+          <tr>
+            <th pSortableColumn="barcode">
+              # Orden
+              <p-sortIcon field="barcode" />
+              <p-columnFilter type="text" field="barcode" display="menu" />
+            </th>
+            <th pSortableColumn="clientName">
+              Cliente
+              <p-sortIcon field="clientName" />
+              <p-columnFilter type="text" field="clientName" display="menu" />
+            </th>
+            <th pSortableColumn="patientName">
+              Paciente
+              <p-sortIcon field="patientName" />
+              <p-columnFilter type="text" field="patientName" display="menu" />
+            </th>
+            <th pSortableColumn="workGroup">
+              Grupo Trabajo
+              <p-sortIcon field="workGroup" />
+              <p-columnFilter field="workGroup" matchMode="equals" display="menu" type="custom">
+                <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                  <p-dropdown
+                    [options]="categories"
+                    [ngModel]="value"
+                    (onChange)="filter($event.value)"
+                    placeholder="Seleccione categoría"
+                    class="w-full"
+                    optionLabel="label"
+                    optionValue="value"
+                  ></p-dropdown>
+                </ng-template>
+              </p-columnFilter>
+            </th>
+            <th pSortableColumn="orderStatus">
+              Estado
+              <p-sortIcon field="orderStatus" />
+              <p-columnFilter field="orderStatus" matchMode="equals" display="menu" type="custom">
+                <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                  <p-select
+                    [ngModel]="value"
+                    [options]="estados"
+                    (onChange)="filter($event.value)"
+                    placeholder="Seleccione estado"
+                    styleClass="w-full"
+                  >
+                    <ng-template let-option #item>
+                      <p-tag [value]="option.value" [severity]="getStatusSeverity(option.value)"></p-tag>
+                    </ng-template>
+                  </p-select>
+                </ng-template>
+              </p-columnFilter>
+            </th>
+            <th pSortableColumn="orderType">
+              Tipo Orden
+              <p-sortIcon field="orderType" />
+              <p-columnFilter type="text" field="orderType" display="menu" />
+            </th>
+            <th pSortableColumn="creationDate">
+              Fecha alta
+              <p-sortIcon field="creationDate" />
+              <p-columnFilter type="date" field="creationDate" display="menu" />
+            </th>
+            <th pSortableColumn="processDate">
+              Fecha Proceso
+              <p-sortIcon field="processDate" />
+              <p-columnFilter type="date" field="processDate" display="menu" />
+            </th>
+            <th pSortableColumn="commitmentDate">
+              Fecha Compromiso
+              <p-sortIcon field="commitmentDate" />
+              <p-columnFilter type="date" field="commitmentDate" display="menu" />
+            </th>
+            <th pSortableColumn="paymentComplete">
+              Pagado
+              <p-sortIcon field="paymentComplete" />
+              <p-columnFilter field="paymentComplete" matchMode="equals" display="menu">
+                <ng-template #filter let-value let-filter="filterCallback">
+                  <p-select
+                    [ngModel]="value"
+                    [options]="factura"
+                    (onChange)="filter($event.value)"
+                    placeholder="Seleccione"
+                    styleClass="w-full"
+                  >
+                    <ng-template let-option #item>
+                      <p-tag
+                        [value]="option.value ? 'Sí' : 'No'"
+                        [severity]="option.value ? 'success' : 'warn'"
+                      ></p-tag>
+                    </ng-template>
+                  </p-select>
+                </ng-template>
+              </p-columnFilter>
+            </th>
+            <th pSortableColumn="applyInvoice">
+              Factura
+              <p-sortIcon field="applyInvoice" />
+              <p-columnFilter field="applyInvoice" matchMode="equals" display="menu">
+                <ng-template #filter let-value let-filter="filterCallback">
+                  <p-select
+                    [ngModel]="value"
+                    [options]="factura"
+                    (onChange)="filter($event.value)"
+                    placeholder="Seleccione"
+                    styleClass="w-full"
+                  >
+                    <ng-template let-option #item>
+                      <p-tag
+                        [value]="option.value ? 'Sí' : 'No'"
+                        [severity]="option.value ? 'success' : 'warn'"
+                      ></p-tag>
+                    </ng-template>
+                  </p-select>
+                </ng-template>
+              </p-columnFilter>
+            </th>
+            <th pSortableColumn="paymentDate">
+              Fecha Pago
+              <p-sortIcon field="paymentDate" />
+              <p-columnFilter type="date" field="paymentDate" display="menu" />
+            </th>
+            <th></th>
+          </tr>
+        </ng-template>
+
+        <ng-template #body let-entity>
+          <tr>
+            <td>
+              <p-button
+                label="{{ entity.barcode }}"
+                class="p-0"
+                styleClass="p-button-link text-primary"
+                (onClick)="editEntity(entity)"
+              ></p-button>
+            </td>
+            <td>{{ entity.clientName }}</td>
+            <td>{{ entity.patientName }}</td>
+            <td>
+              <p-tag
+                [value]="entity.workGroup"
+                [severity]="entity.workGroup === 'GAMMA' ? 'info' : 'success'"
+              ></p-tag>
+            </td>
+            <td>
+              <p-tag
+                [value]="entity.orderStatus"
+                [severity]="getStatusSeverity(entity.orderStatus)"
+              ></p-tag>
+            </td>
+            <td>
+              <p-tag
+                [value]="entity.orderType"
+                [severity]="entity.orderType === 'NORMAL' ? 'info' : 'danger'"
+              ></p-tag>
+            </td>
+            <td>{{ entity.creationDate | date: 'dd/MM/yyyy' }}</td>
+            <td>
+              {{ entity.processDate && entity.processDate !== '0001-01-01T00:00:00' ? (entity.processDate | date: 'dd/MM/yyyy') : '' }}
+            </td>
+            <td>{{ entity.commitmentDate | date: 'dd/MM/yyyy' }}</td>
+            <td>
+              <p-tag
+                [value]="entity.paymentComplete ? 'Sí' : 'No'"
+                [severity]="entity.paymentComplete ? 'success' : 'warn'"
+              ></p-tag>
+            </td>
+            <td>
+              <p-tag
+                [value]="entity.applyInvoice ? 'Sí' : 'No'"
+                [severity]="entity.applyInvoice ? 'success' : 'warn'"
+              ></p-tag>
+            </td>
+            <td>
+              {{ entity.paymentDate ? (entity.paymentDate | date: 'dd/MM/yyyy') : '' }}
+            </td>
+            <td style="position: relative">
+              <button
+                pButton
+                type="button"
+                icon="pi pi-ellipsis-v"
+                class="p-button-text p-button-plain"
+                (click)="openMenu($event, entity)"
+              ></button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+  </div>
+</div>
+
+<p-menu #menu [popup]="true" [model]="currentMenuItems" appendTo="body"></p-menu>
+
+<app-order-modal
+  [showDialog]="showDialog"
+  [entity]="entity"
+  [products]="products"
+  (onClose)="onClose()"
+  (onSave)="onSave()"
+></app-order-modal>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

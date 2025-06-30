@@ -1,0 +1,156 @@
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <div class="w-full flex justify-start gap-2">
+      <p-button label="Filtros Avanzados" icon="pi pi-sliders-h" (click)="showFilters = !showFilters" />
+      <h5 class="m-0 ml-4">Reporte de Comisiones</h5>
+    </div>
+  </ng-template>
+  <ng-template #end>
+    <p-button label="Exportar" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
+  </ng-template>
+</p-toolbar>
+
+<p-panel [toggleable]="true" [collapsed]="!showFilters" [style]="{ 'margin-bottom': '2rem' }" header="Filtros de búsqueda">
+  <div class="grid grid-cols-12 gap-4 items-end">
+    <div class="col-span-12 md:col-span-4">
+      <label class="block font-bold mb-1">Buscar por cliente o empleado</label>
+      <input pInputText [(ngModel)]="filters.search" class="w-full" />
+    </div>
+
+    <div class="col-span-12 md:col-span-2">
+      <label class="block font-bold mb-1">Fecha Inicio</label>
+      <p-datepicker [(ngModel)]="filters.creationDateStart" dateFormat="dd/mm/yy" appendTo="body" [iconDisplay]="'input'" [showIcon]="true" fluid />
+    </div>
+
+    <div class="col-span-12 md:col-span-2">
+      <label class="block font-bold mb-1">Fecha Fin</label>
+      <p-datepicker [(ngModel)]="filters.creationDateEnd" dateFormat="dd/mm/yy" appendTo="body" [iconDisplay]="'input'" [showIcon]="true" fluid />
+    </div>
+
+    <div class="col-span-12 md:col-span-1 flex justify-end">
+      <p-button icon="pi pi-search" label="Buscar" (onClick)="search()" styleClass="p-button-success w-full md:w-auto" />
+    </div>
+
+    <div class="col-span-12 md:col-span-1 flex justify-start">
+      <p-button icon="pi pi-refresh" label="Limpiar" (onClick)="clearFilters()" severity="secondary" [outlined]="true" styleClass="w-full md:w-auto" />
+    </div>
+  </div>
+</p-panel>
+
+<div class="grid grid-cols-12 gap-4 mt-8">
+ 
+
+  <div class="col-span-12 md:col-span-4">
+    <p-card>
+      <div class="flex flex-col items-center justify-center p-4">
+        <h3 class="text-xl font-bold mb-4">Top 5 empleados</h3>
+        <p-chart 
+          type="doughnut" 
+          [data]="donutChartData" 
+          [options]="donutOptions" 
+          style="width: 250px; height: 270px;">
+          
+        </p-chart>
+      </div>
+    </p-card>
+  </div>
+
+  <div class="col-span-12 md:col-span-8">
+    <p-card>
+      <div class="flex flex-col items-center justify-center p-4">
+        <h3 class="text-xl font-bold mb-4">Detalle por empleado</h3>
+        <p-chart 
+          type="bar" 
+          [data]="barChartData" 
+          [options]="barOptions" 
+          style="width: 61%;  height: 270px;">
+        </p-chart>
+      </div>
+    </p-card>
+  </div>
+</div>
+
+
+<!-- Consolidado aqui -->
+<div class="grid grid-cols-12 gap-4  mt-8">
+  <div class="col-span-12">
+    <p-card>
+      <div class="p-4">
+        <h3 class="text-xl font-bold mb-4">Consolidado por Empleado</h3>
+
+        <p-table
+          [value]="reportOrders.summary"
+          [responsiveLayout]="'scroll'">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Empleado</th>
+              <th>Órdenes</th>
+              <th>Monto Total</th>
+              <th>Comisión Total</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-summary>
+            <tr>
+              <td><strong>{{ summary.employeeName }}</strong></td>
+              <td>{{ summary.totalOrders }}</td>
+              <td><strong>{{ summary.totalAmount | currency }}</strong></td>
+              <td><strong>{{ summary.totalCommission | currency }}</strong></td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </p-card>
+  </div>
+</div>
+
+
+<!-- DETALLE POR ORDEN -->
+<div class="grid grid-cols-12 gap-4 mt-8">
+  <div class="col-span-12">
+    <p-card>
+      <div class="p-4">
+        <h3 class="text-xl font-bold mb-4">Detalle de Comisiones </h3>
+
+        <p-table
+          [value]="reportOrders.items"
+          [paginator]="true"
+          [rows]="50"
+          scrollable="true"
+          [scrollHeight]="scrollHeight"
+          [rowsPerPageOptions]="[100, 150, 200]"
+          [responsiveLayout]="'scroll'">          
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Empleado</th>
+              <th>Orden</th>
+              <th>Cliente</th>
+              <th>Fecha Alta</th>
+              <th>Total</th>
+              <th>% Comisión</th>
+              <th>Comisión</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-order>
+            <tr>
+              <td><strong>  {{ order.employeeName }}</strong> </td>
+              <td>              <p-button label="{{ order.orderBarcode }}" class="p-0" styleClass="p-button-link text-green-600"
+                (onClick)="openOrderModal(order.order)"></p-button></td>
+
+              <td>{{ order.clientName }}</td>
+              <td>{{ order.creationDate | date: 'dd/MM/yyyy' }}</td>
+              <td> <strong> {{ order.orderTotal | currency }} </strong></td>
+              <td> <strong>{{ order.commissionPercentage }}% </strong></td>
+              <td> <strong>{{ order.commissionAmount | currency }} </strong></td>
+            </tr>
+          </ng-template>
+
+        </p-table>
+      </div>
+    </p-card>
+  </div>
+</div>
+
+<app-order-modal [showDialog]="showDialog" *ngIf="this.orderEntity" [entity]="this.orderEntity"
+  (onClose)="showDialog = false"></app-order-modal>

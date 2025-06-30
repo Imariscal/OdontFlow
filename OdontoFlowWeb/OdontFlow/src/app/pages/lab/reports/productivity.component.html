@@ -1,0 +1,221 @@
+<p-toolbar styleClass="mb-4">
+  <ng-template #start>
+    <h5 class="m-0">Reporte de Productividad</h5>
+  </ng-template>
+  <ng-template #end>
+    <p-dropdown
+      [(ngModel)]="selectedFilter"
+      [options]="[
+        { label: 'Semana Actual', value: 'currentWeek' },
+        { label: 'Semana Anterior', value: 'lastWeek' },
+        { label: 'Mes Actual', value: 'currentMonth' },
+        { label: 'Mes Anterior', value: 'lastMonth' }
+      ]"
+      optionLabel="label"
+      (onChange)="onFilterChange()"
+      placeholder="Selecciona un rango"
+    />
+  </ng-template>
+</p-toolbar>
+
+<div *ngIf="!loading && summary" class="grid grid-cols-12 gap-4">
+
+  <!-- POR ESTACIÓN -->
+  <div class="col-span-12 md:col-span-12">
+    <p-card header="Consolidado por Estación">
+      <p-table [value]="summary.porEstacion ?? []" [paginator]="true" [rows]="5">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Estación</th>
+            <th>Total</th>
+            <th>En Espera</th>
+            <th>En Proceso</th>
+            <th>Terminados</th>
+            <th>Bloqueados</th>
+            <th>Rechazados</th>
+            <th>En Tiempo</th>
+            <th>Con Alarma</th>
+            <th>Con Retraso</th>
+            <th>% Cumplimiento</th>
+            <th>% Productividad</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.stationName }}</td>
+            <td>{{ row.totalTrabajos }}</td>
+            <td>{{ row.trabajosEnEspera }}</td>
+            <td>{{ row.trabajosEnProceso }}</td>
+            <td>{{ row.trabajosTerminados }}</td>
+            <td>{{ row.trabajosBloqueados }}</td>
+            <td>{{ row.trabajosRechazados }}</td>
+            <td>{{ row.trabajosEnTiempo }}</td>
+            <td>{{ row.trabajosConAlarma }}</td>
+            <td>{{ row.trabajosConRetraso }}</td>
+            <td>
+              <span [ngClass]="getProductivityClass(row.cumplimiento)">
+                {{ row.cumplimiento }}
+              </span>
+            </td>
+            <td>
+              <span [ngClass]="getProductivityClass(row.productividad)">
+                {{ row.productividad }}
+              </span>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+  </div>
+
+  <!-- DETALLE POR ESTACIÓN -->
+  <div class="col-span-12">
+    <p-card header="Detalle por Estación">
+      <p-table [value]="detail" [paginator]="true" [rows]="10">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Estación</th>
+            <th>Orden</th>
+            <th>Producto</th>
+            <th>Cliente</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Fin</th>
+            <th>% Productividad</th>
+            <th>¿A Tiempo?</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.workStationName }}</td>
+            <td>
+              <p-button
+                label="{{ row.orderNumber }}"
+                class="p-0"
+                styleClass="p-button-link text-primary"
+                (onClick)="openOrderModal(row.orderId)"
+              ></p-button>
+            </td>
+            <td>{{ row.productName }}</td>
+            <td>{{ row.clientName }}</td>
+            <td>{{ row.employeeStartDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ row.employeeEndDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td>
+              <span [ngClass]="getProductivityClass(row.productivityPercent)">
+                {{ row.productivityPercent }}
+              </span>
+            </td>
+            <td>
+              <p-tag
+                [value]="row.workedOnTime ? 'Sí' : 'No'"
+                [severity]="row.workedOnTime ? 'success' : 'danger'"
+              ></p-tag>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+  </div>
+
+  <!-- CONSOLIDADO POR EMPLEADO -->
+  <div class="col-span-12 md:col-span-12">
+    <p-card header="Consolidado por Laboratorista">
+      <p-table [value]="summary.porEmpleado ?? []" [paginator]="true" [rows]="5">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Empleado</th>
+            <th>Total</th>
+            <th>En Espera</th>
+            <th>En Proceso</th>
+            <th>Terminados</th>
+            <th>Bloqueados</th>
+            <th>Rechazados</th>
+            <th>En Tiempo</th>
+            <th>Con Alarma</th>
+            <th>Con Retraso</th>
+            <th>% Prod Técnica</th>
+            <th>% Prod Real</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.employeeName }}</td>
+            <td>{{ row.totalTrabajos }}</td>
+            <td>{{ row.trabajosEnEspera }}</td>
+            <td>{{ row.trabajosEnProceso }}</td>
+            <td>{{ row.trabajosTerminados }}</td>
+            <td>{{ row.trabajosBloqueados }}</td>
+            <td>{{ row.trabajosRechazados }}</td>
+            <td>{{ row.trabajosEnTiempo }}</td>
+            <td>{{ row.trabajosConAlarma }}</td>
+            <td>{{ row.trabajosConRetraso }}</td>
+            <td>
+              <span [ngClass]="getProductivityClass(row.cumplimiento)">
+                {{ row.cumplimiento }}
+              </span>
+            </td>
+            <td>
+              <span [ngClass]="getProductivityClass(row.productividad)">
+                {{ row.productividad }}
+              </span>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+  </div>
+
+  <!-- DETALLE POR EMPLEADO -->
+  <div class="col-span-12">
+    <p-card header="Detalle por Laboratorista">
+      <p-table [value]="detailByEmployee" [paginator]="true" [rows]="10">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Empleado</th>
+            <th>Estación</th>
+            <th>Orden</th>
+            <th>Producto</th>
+            <th>Cliente</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Fin</th>
+            <th>Tiempo Real</th>
+            <th>Tiempo Estimado</th>
+            <th>% Productividad</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-emp>
+          <tr>
+            <td>{{ emp.currentEmployee }}</td>
+            <td>{{ emp.workStationName }}</td>
+            <td>
+              <p-button
+                label="{{ emp.orderNumber }}"
+                class="p-0"
+                styleClass="p-button-link text-primary"
+                (onClick)="openOrderModal(emp.orderId)"
+              ></p-button>
+            </td>
+            <td>{{ emp.productName }}</td>
+            <td>{{ emp.clientName }}</td>
+            <td>{{ emp.employeeStartDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ emp.employeeEndDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ emp.realTime }}</td>
+            <td>{{ emp.estimatedTime }}</td>
+            <td>
+              <span [ngClass]="getProductivityClass(emp.productivityPercent)">
+                {{ emp.productivityPercent }}
+              </span>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+  </div>
+
+</div>
+
+<app-order-modal
+  [showDialog]="showDialog"
+  [isLabView]="true"
+  [entity]="orderEntity"
+  (onClose)="showDialog = false"
+></app-order-modal>

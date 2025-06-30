@@ -1,0 +1,53 @@
+<p-dialog [(visible)]="showDialog" [style]="{ width: '650px' }" [closeOnEscape]="false" (onHide)="closeClick()"
+  header="Detalles de Precio Lista" [modal]="true">
+  <form [formGroup]="form" class="p-fluid">
+    <div class="flex flex-col gap-6">
+      <div>
+        <label for="name" class="block font-bold mb-3">Nombre <small class="text-red-500">*</small>:</label>
+        <input id="name" type="text"
+          [ngClass]="name?.errors && (name?.touched || name?.dirty) ? 'ng-invalid ng-dirty' : ''" pInputText
+          formControlName="name" autofocus fluid />
+        <small class="text-red-500" *ngIf="name?.errors && (name?.touched || name?.dirty)">
+          <ng-container *ngIf="name?.hasError('required')">Este campo es obligatorio.</ng-container>
+          <ng-container *ngIf="name?.hasError('minlength')">Mínimo {{ name?.errors?.['minlength']?.requiredLength }}
+            caracteres.</ng-container>
+        </small>
+      </div>
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-6">
+          <span class="block font-bold mb-4">Categoría <small class="text-red-500">*</small>:</span>
+          <div class="grid grid-cols-12 gap-4">
+            <div *ngFor="let cat of categories" class="flex items-center gap-2 col-span-6">
+              <p-radioButton [inputId]="cat.value" name="categoryId" [value]="cat.value" formControlName="categoryId" />
+              <label [for]="cat.value">{{ cat.label }}</label>
+            </div>
+          </div>
+        </div>
+        <div class="col-span-6">
+          <label for="name" class="block font-bold mb-3">Descuento <small class="text-red-500">*</small>:</label>
+          <p-inputNumber id="price" formControlName="discount"
+            [ngClass]="discount?.errors && (discount?.touched || discount?.dirty) ? 'ng-invalid ng-dirty' : ''"
+            mode="decimal" suffix="%" inputId="discount" [minFractionDigits]="0" [maxFractionDigits]="2" [min]="0"
+            [max]="100" fluid [useGrouping]="false" />
+          <small class="text-red-500" *ngIf="discount?.errors && (discount?.touched || discount?.dirty)">
+            <ng-container *ngIf="discount?.hasError('min')">El valor del descuento no puede ser menor de
+              %0</ng-container>
+            <ng-container *ngIf="discount?.hasError('max')">El valor del descuento no puede ser mayor de
+              %100</ng-container>
+          </small>
+        </div>
+        <div class="col-span-6">
+          <label for="name" class="block font-bold mb-3 mr-5">Activo : 
+            <p-toggleswitch  
+              formControlName="active"
+              class=" ml-5 mt-2" /></label>
+
+        </div>
+      </div>
+    </div>
+  </form>
+  <ng-template #footer>
+    <p-button label="Cancelar" icon="pi pi-times" text (click)="closeClick()" />
+    <p-button label="Guardar" icon="pi pi-check" [disabled]="!form.valid" (click)="saveClick()" />
+  </ng-template>
+</p-dialog>

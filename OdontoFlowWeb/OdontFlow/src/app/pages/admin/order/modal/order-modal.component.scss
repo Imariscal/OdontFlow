@@ -1,0 +1,21 @@
+.dental-chart {
+    margin-top: 20px;
+    text-align: center;
+  }
+  svg {
+    border: 1px solid #ccc;
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    padding: 10px;
+  }
+
+  .dental-chart {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  input[disabled] {
+  pointer-events: auto; /* esto rompería la desactivación visual */
+}
+  

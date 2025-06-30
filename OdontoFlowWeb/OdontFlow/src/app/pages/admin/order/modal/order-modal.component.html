@@ -1,0 +1,507 @@
+<p-dialog [(visible)]="showDialog" [style]="{ width: '1250px', height: '160vh' }" [closeOnEscape]="false"
+  (onHide)="closeClick()" [header]="'Detalle Orden ' + (entity?.barcode ? entity?.barcode  : '' )" [modal]="true">
+  <form [formGroup]="form" class="p-fluid">
+    <div class="grid grid-cols-12 gap-2">
+      <!-- Formulario -->
+      <div class="col-span-9">
+          <p-tabs [value]="selectedTab" (valueChange)="selectedTab = $event">
+          <p-tablist>
+            <p-tab value="0">Orden</p-tab>
+            <p-tab value="1">Imagenes</p-tab>
+            <p-tab value="2">Información Adicional</p-tab>
+            <p-tab value="3" *ngIf="entity?.id && !isLabView">Pagos</p-tab>
+
+          </p-tablist>
+
+          <p-tabpanels>
+            <!-- Orden -->
+            <p-tabpanel value="0">
+              <div class="grid grid-cols-12 gap-6">
+                <!-- Form Left -->
+                <div class="col-span-7">
+                  <div class="grid grid-cols-1 gap-4">
+                    <!-- Cliente -->
+                    <div>
+                      <label class="block font-bold mb-1">Cliente <small class="text-red-500">*</small></label>
+                      <p-autocomplete inputId="clientId" (onSelect)="onClientSelected($event)"
+                        [ngClass]="clientId?.errors && (clientId?.touched || clientId?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                        formControlName="clientId" fluid optionLabel="name" optionValue="id"
+                        [suggestions]="filteredClients" (completeMethod)="filterClient($event)">
+                        <ng-template let-employe #item>
+                          <div class="flex items-center gap-2">{{ employe.name }}</div>
+                        </ng-template>
+                        <ng-template #header>
+                          <div class="font-medium px-3 py-2">Clientes Disponibles</div>
+                        </ng-template>
+                        <!-- <ng-template #footer>
+                            <div class="px-3 py-3">
+                              <p-button label="Agregar Cliente" (click)="showAddClient = true" fluid severity="secondary"
+                                text size="small" icon="pi pi-plus" />
+                            </div>
+                          </ng-template> -->
+                        <ng-template pTemplate="empty">
+                          <div class="px-3 py-2 text-gray-500">Sin resultados o sin disponibles.</div>
+                        </ng-template>
+                      </p-autocomplete>
+                      <small class="text-red-500" *ngIf="clientId?.errors && (clientId?.touched || clientId?.dirty)">
+                        <ng-container *ngIf="clientId?.hasError('required')">Este campo es
+                          obligatorio.</ng-container>
+                      </small>
+                    </div>
+
+                    <!-- Paciente -->
+                    <div>
+                      <label class="block font-bold mb-1">Paciente <small class="text-red-500">*</small></label>
+                      <input pInputText formControlName="patientName"
+                        [ngClass]="patientName?.errors && (patientName?.touched || patientName?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                        pInputText fluid />
+                      <small class="text-red-500"
+                        *ngIf="patientName?.errors && (patientName?.touched || patientName?.dirty)">
+                        <ng-container *ngIf="patientName?.hasError('required')">Este campo es
+                          obligatorio.</ng-container>
+                      </small>
+                    </div>
+
+                    <!-- Solicitante -->
+                    <div>
+                      <label class="block font-bold mb-1">Solicitante </label>
+                      <input pInputText formControlName="requesterName" pInputText fluid />
+
+                    </div>
+
+                    <!-- Tipo de Orden y Fecha Compromiso -->
+                    <div class="grid grid-cols-12 gap-4">
+                      <div class="col-span-6">
+                        <label class="block font-bold mb-1">Tipo Orden <small class="text-red-500">*</small></label>
+                        <p-select formControlName="orderTypeId" [options]="orderTypes" optionLabel="text"
+                          optionValue="value" appendTo="body" placeholder="Selecciona un tipo de Orden" fluid>
+                        </p-select>
+                      </div>
+                      <div class="col-span-6">
+                        <label class="block font-bold mb-1">Fecha Compromiso</label>
+                        <p-datepicker formControlName="commitmentDate" dateFormat="dd/mm/yy" [disabled]="true"
+                          [minDate]="isEditMode ? null : today" appendTo="body" [iconDisplay]="'input'"
+                          [showIcon]="true" inputId="icondisplay" fluid />
+                      </div>
+                    </div>
+
+                    <!-- Color -->
+                    <div class="grid grid-cols-12 gap-4">
+                      <div class="col-span-6">
+                        <label class="block font-bold mb-1">Color <small class="text-red-500">*</small></label>
+                        <input pInputText formControlName="color"
+                          [ngClass]="color?.errors && (color?.touched || color?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                          pInputText fluid />
+                        <small class="text-red-500" *ngIf="color?.errors && (color?.touched || color?.dirty)">
+                          <ng-container *ngIf="color?.hasError('required')">Este campo es obligatorio.</ng-container>
+                        </small>
+                      </div>
+                      <div class="col-span-6 mt-8" *ngIf="isEditMode">
+                        <p-checkbox formControlName="uncollectible" [binary]="true" />
+                        <label for="uncollectible" class="ml-2">Incobrable</label>
+                      </div>
+                    </div>
+
+
+                  </div>
+
+                  <div class="grid grid-cols-1 gap-4 mt-5">
+                    <div class="grid grid-cols-1 gap-4">
+                      <h6 class="text-md font-semibold border-b pb-2 mb-4">Productos seleccionados</h6>
+                    </div>
+                    <div class="grid grid-cols-1 gap-4">
+
+                      <p-toolbar class="mb-4" *ngIf="!isLabView">
+                        <ng-template #start>
+                          <p-button label="Agregar" icon="pi pi-plus" (onClick)="addNewItem()"
+                            [disabled]="entity && entity.orderStatusId === 5" class="mr-2" />
+                        </ng-template>
+                      </p-toolbar>
+
+                      <p-table [value]="items.controls" [paginator]="true" [rows]="5" dataKey="productId"
+                        [(selection)]="selectedItems" [tableStyle]="{ 'min-width': '20rem' }" responsiveLayout="scroll">
+                        <ng-template pTemplate="header">
+                          <tr>
+                            <th>Qty</th>
+                            <th>Producto</th>
+                            <th *ngIf="!isLabView">P. Unit</th>
+                            <th *ngIf="!isLabView">Total</th>
+                            <th style="width: 5rem">Acciones</th>
+                          </tr>
+                        </ng-template>
+
+                        <ng-template pTemplate="body" let-row let-rowIndex="rowIndex">
+                          <tr [formGroup]="row">
+                            <td>{{ row.get('quantity')?.value }}</td>
+                            <td>{{ getProductName(row.get('productId')?.value) }}</td>
+                            <td *ngIf="!isLabView">{{ row.get('unitCost')?.value | currency }}</td>
+                            <td *ngIf="!isLabView">{{ row.get('totalCost')?.value | currency }}</td>
+                            <td>
+                              <div class="flex align-items-center ">
+                                <p-button icon="pi pi-pencil" class="p-button-outlined p-button-sm"
+                                  (click)="editItem(rowIndex)"
+                                  [disabled]="entity && entity.orderStatusId === 5"></p-button>
+                                <p-button icon="pi pi-trash" severity="danger" class="p-button-outlined p-button-sm"
+                                  (click)="deleteItem(rowIndex)" *ngIf="!isLabView"
+                                  [disabled]="entity && entity.orderStatusId === 5"></p-button>
+                              </div>
+                            </td>
+                          </tr>
+                        </ng-template>
+                      </p-table>
+
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cliente Info -->
+                <div class="col-span-5 border-l pl-6">
+                  <div class="p-4">
+                    <h3 class="text-lg font-semibold mb-4 border-b pb-2 text-gray-800">Información del Cliente</h3>
+
+                    <div class="grid grid-cols-12 gap-y-3 text-sm text-gray-700">
+                      <div class="col-span-4 font-bold flex items-center gap-2">
+                        <i class="pi pi-user"></i> Contacto:
+                      </div>
+                      <div class="col-span-8 text-right">{{ selectedClient?.contact ?? 'ND' }}</div>
+
+                      <div class="col-span-4 font-bold flex items-center gap-2">
+                        <i class="pi pi-tags"></i> Categoría:
+                      </div>
+                      <div class="col-span-8 text-right">{{ selectedClient?.workGroup ?? 'ND' }}</div>
+
+                      <div class="col-span-4 font-bold flex items-center gap-2">
+                        <i class="pi pi-money-bill"></i> Precio Lista:
+                      </div>
+                      <div class="col-span-8 text-right">{{ selectedClient?.priceList ?? 'ND' }}</div>
+
+                      <div class="col-span-4 font-bold flex items-center gap-2">
+                        <i class="pi pi-envelope"></i> Correo:
+                      </div>
+                      <div class="col-span-8 text-right">{{ selectedClient?.generalEmail ?? 'ND' }}</div>
+
+                      <div class="col-span-4 font-bold flex items-center gap-2">
+                        <i class="pi pi-phone"></i> Teléfono:
+                      </div>
+                      <div class="col-span-8 text-right">{{ selectedClient?.phone1 ?? 'ND' }}</div>
+
+                      <div class="col-span-4 font-bold flex items-center gap-2">
+                        <i class="pi pi-id-card"></i> Representante:
+                      </div>
+                      <div class="col-span-8 text-right">{{ selectedClient?.employeeName ?? 'ND' }}</div>
+
+                      <div class="col-span-4 font-bold flex items-center gap-2">
+                        <i class="pi pi-comment"></i> Comentarios:
+                      </div>
+                      <div class="col-span-8 text-right">{{ selectedClient?.remarks ?? 'ND' }}</div>
+                    </div>
+                  </div>
+
+                  <div class="mt-6">
+                    <h6 class="text-md font-semibold border-b pb-2 mb-4">Muestras Entregadas</h6>
+
+                    <div class="grid grid-cols-2 gap-y-4 gap-x-3">
+                      <div *ngFor="let muestra of muestrasBooleanas" class="flex items-center gap-2">
+                        <p-checkbox [formControlName]="muestra.key" [binary]="true"
+                          inputId="{{ muestra.key }}"></p-checkbox>
+                        <label [for]="muestra.key" class="text-sm font-medium">{{ muestra.label }}</label>
+                      </div>
+                    </div>
+
+                    <div class="mt-5 flex items-center gap-2">
+                      <label for="otros" class="font-semibold whitespace-nowrap">Otros:</label>
+                      <input type="text" pInputText formControlName="others" id="otros" class="flex-1" />
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </p-tabpanel>
+
+            <!-- Informacion adicional -->
+            <p-tabpanel value="1">
+              <div class="p-4 text-gray-500">
+
+                <div class="card">
+                  <p-fileupload name="myfile[]" url="https://www.primefaces.org/cdn/api/upload.php" [multiple]="true"
+                    accept="image/*" maxFileSize="1000000"  
+                 >
+                    <ng-template #header let-files let-chooseCallback="chooseCallback" let-clearCallback="clearCallback"
+                      let-uploadCallback="uploadCallback">
+                      <div class="flex flex-wrap justify-between items-center flex-1 gap-4">
+                        <div class="flex gap-2">
+                          <p-button   icon="pi pi-images" [rounded]="true"
+                            [outlined]="true" />
+                          <p-button  icon="pi pi-cloud-upload" [rounded]="true"
+                            [outlined]="true" severity="success" [disabled]="!files || files.length === 0" />
+                          <p-button (onClick)="clearCallback()" icon="pi pi-times" [rounded]="true" [outlined]="true"
+                            severity="danger" [disabled]="!files || files.length === 0" />
+                        </div>
+                        <p-progressbar [value]="totalSizePercent" [showValue]="false" class="w-full"
+                          styleClass="md:w-20rem h-1 w-full md:ml-auto">
+                          <span class="whitespace-nowrap">{{ totalSize }}B / 1Mb</span>
+                        </p-progressbar>
+                      </div>
+                    </ng-template>
+                    <ng-template #content let-files let-uploadedFiles="uploadedFiles"
+                      let-removeFileCallback="removeFileCallback"
+                      let-removeUploadedFileCallback="removeUploadedFileCallback">
+                      <div class="flex flex-col gap-8 pt-4">
+                        <div *ngIf="files?.length > 0">
+                          <h5>Pending</h5>
+                          <div class="flex flex-wrap gap-4">
+                            <div *ngFor="let file of files; let i = index"
+                              class="p-8 rounded-border flex flex-col border border-surface items-center gap-4">
+                              <div>
+                                <img role="presentation" [alt]="file.name" [src]="file.objectURL" width="100"
+                                  height="50" />
+                              </div>
+                              <span class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden">{{
+                                file.name }}</span>
+ 
+                              <p-badge value="Pending" severity="warn" />
+                              <p-button icon="pi pi-times"
+                                 [outlined]="true"
+                                [rounded]="true" severity="danger" />
+                            </div>
+                          </div>
+                        </div>
+                        <div *ngIf="uploadedFiles?.length > 0">
+                          <h5>Completed</h5>
+                          <div class="flex flex-wrap gap-4">
+                            <div *ngFor="let file of uploadedFiles; let i = index"
+                              class="card m-0 px-12 flex flex-col border border-surface items-center gap-4">
+                              <div>
+                                <img role="presentation" [alt]="file.name" [src]="file.objectURL" width="100"
+                                  height="50" />
+                              </div>
+                              <span class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden">{{
+                                file.name }}</span>
+      
+                              <p-badge value="Completed" class="mt-4" severity="success" />
+                              <p-button icon="pi pi-times" (onClick)="removeUploadedFileCallback(i)" [outlined]="true"
+                                [rounded]="true" severity="danger" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </ng-template>
+                    <ng-template #file></ng-template>
+                    <ng-template #empty>
+                      <div class="flex items-center justify-center flex-col">
+                        <i class="pi pi-cloud-upload !border-2 !rounded-full !p-8 !text-4xl !text-muted-color"></i>
+                        <p class="mt-6 mb-0">Drag and drop files to here to upload.</p>
+                      </div>
+                    </ng-template>
+                  </p-fileupload>
+                </div>
+              </div>
+            </p-tabpanel>
+
+            <!-- Documentos  -->
+            <p-tabpanel value="2">
+              <div class="grid grid-cols-12 gap-6">
+                <div class="col-span-12 mt-3">
+                  <label class="block font-bold mb-1">Comentarios Orden </label>
+                  <textarea pInputText formControlName="observations" pTextarea rows="8" cols="20" fluid pInputText
+                    fluid> </textarea>
+                </div>
+                <div class="col-span-12 mt-2">
+                  <label class="block font-bold mb-1">Comentarios Recoleccion </label>
+                  <textarea pInputText formControlName="collectionNotes" pTextarea rows="8" cols="20" fluid pInputText
+                    fluid> </textarea>
+                </div>
+                <div class="col-span-12 mt-2">
+                  <label class="block font-bold mb-1">Comentarios Entrega </label>
+                  <textarea pInputText formControlName="deliveryNotes" pTextarea rows="8" cols="20" fluid pInputText
+                    fluid> </textarea>
+                </div>
+              </div>
+
+            </p-tabpanel>
+
+            <!-- Pagos -->
+            <p-tabpanel value="3">
+              <ng-container *ngIf="entity?.id && !isLabView">
+                <app-payment [entity]="entity" [totalVisual]="totals.total"
+                  (onSave)="onSavePayments($event)"></app-payment>
+              </ng-container>
+            </p-tabpanel>
+          </p-tabpanels>
+        </p-tabs>
+      </div>
+      <!-- Timeline -->
+      <div class="col-span-3 mt-4">
+        <div class="grid grid-cols-12 ">
+          <div class=" col-span-12">
+
+            <div class="shadow-sm border border-gray-200 rounded p-4 mt-9">
+              <h3 class="text-lg font-semibold  border-b pb-2 text-gray-800">Estado de la Orden</h3>
+              <p-timeline [value]="events()" styleClass="customized-timeline">
+                <ng-template #opposite let-event>
+                  <small class="text-surface-500 dark:text-surface-400" [innerHTML]="event.status"></small>
+                </ng-template>
+                <ng-template #marker let-event>
+                  <span class="flex w-8 h-8 items-center justify-center text-white rounded-full z-10 shadow-sm"
+                    [style]="{ 'background-color': event.color }">
+                    <i [class]="event.icon"></i>
+                  </span>
+                </ng-template>
+                <ng-template #content let-event>
+                  <p>{{ event.date }}</p>
+                </ng-template>
+              </p-timeline>
+            </div>
+
+          </div>
+
+          <!-- Resumen de pago -->
+          <div class="col-span-12 mt-2" *ngIf="!isLabView">
+            <div class="shadow-sm border border-gray-200 rounded p-4">
+              <div class=" flex spacee-between mb-4 border-b pb-2">
+                <h3 class="text-lg font-semibold  text-gray-800 mr-5 ">Total a Pagar</h3>
+                <div class="p-flex p-jc-between font-bold mr-5">
+                  <p-checkbox formControlName="applyInvoice" [binary]="true" />
+                  <label for="applyInvoice" class="ml-2">Facturar</label>
+                </div>
+              </div>
+
+              <div class="p-flex p-jc-between font-bold ">
+                <span>Subtotal:</span>
+                <span class="font-semibold ml-auto mt-3">{{ totals.subtotal | currency:'USD' }}</span>
+              </div>
+              <div class="p-flex p-jc-between font-bold  mt-3">
+                <span>IVA (16%): </span>
+                <span class="font-semibold ml-auto mt-3">{{ totals.iva | currency:'USD' }}</span>
+              </div>
+              <p-divider />
+              <div class="p-flex p-jc-between font-bold   mt-3">
+                <span>Total:</span>
+                <span class="ml-auto mt-3">{{ totals.total | currency:'USD' }}</span>
+              </div>
+
+              <div class="p-flex p-jc-between text-green-600 mt-3">
+                <span>Pagos:</span>
+                <span class="ml-auto">{{ totals.payments | currency:'USD' }}</span>
+              </div>
+              <p-divider />
+              <div class="p-flex p-jc-between font-bold text-red-600   mt-3">
+                <span>Saldo:</span>
+                <span class="ml-auto">{{ totals.balance | currency:'USD' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- Footer Botones -->
+  <ng-template #footer>
+    <p-button label="Cancelar" icon="pi pi-times" text (click)="closeClick()" />
+    <p-button label="Guardar" icon="pi pi-check" *ngIf="!isLabView"
+      [disabled]="!form.valid || (entity && entity.orderStatusId === 5)" (click)="saveClick()" />
+  </ng-template>
+</p-dialog>
+
+
+
+<p-dialog [(visible)]="itemDialog" [style]="{ width: '500px' }" header="Detalle de Producto" [modal]="true">
+  <ng-container *ngIf="editingItem">
+    <form [formGroup]="editingItem ?? emptyForm" class="flex flex-col gap-4">
+      <div>
+        <label class="block font-bold mb-2">Producto</label>
+        <p-dropdown [options]="products" optionLabel="name" optionValue="id" (onChange)="onProductSelected($event)"
+          [showClear]="true" [filter]="true" [filterBy]="'name'" [appendTo]="'body'" formControlName="productId"
+          placeholder="Selecciona un producto" class="w-full" />
+        <small class="text-red-500" *ngIf="editingItem?.get('productId')?.hasError('duplicateProduct')">
+          Este producto ya ha sido agregado a la orden.
+        </small>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block font-bold mb-2">Cantidad</label>
+          <p-inputNumber formControlName="quantity" [readonly]="true" class="w-full" [min]="1"></p-inputNumber>
+        </div>
+        <div *ngIf="!isLabView">
+          <label class="block font-bold mb-2">Costo Unitario</label>
+          <p-inputNumber formControlName="unitCost" class="w-full" mode="currency" currency="USD" locale="en-US" />
+        </div>
+      </div>
+      <div *ngIf="!isLabView">
+        <label class="block font-bold mb-2">Total</label>
+        <p-inputNumber formControlName="totalCost" mode="currency" currency="USD" locale="en-US" class="w-full"
+          [disabled]="true" />
+      </div>
+      <div class="flex gap-4 mb-3">
+        <div class="flex items-center gap-2">
+          <input type="checkbox" [checked]="selectedTeeth.includes(PType.SUPERIOR)"
+            (change)="selectRegion(PType.SUPERIOR)" id="checkboxSuperior" class="w-5 h-5 border border-black rounded" />
+          <label for="checkboxSuperior" class="font-medium">SUPERIOR</label>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input type="checkbox" [checked]="selectedTeeth.includes(PType.INFERIOR)"
+            (change)="selectRegion(PType.INFERIOR)" id="checkboxInferior" class="w-5 h-5 border border-black rounded" />
+          <label for="checkboxInferior" class="font-medium">INFERIOR</label>
+        </div>
+      </div>
+
+      <div>
+        <label class="block font-bold mb-2">Piezas</label>
+        <div class="dental-chart">
+          <svg viewBox="0 0 800 220" width="100%" preserveAspectRatio="xMidYMid meet">
+            <!-- Etiquetas -->
+            <text x="70" y="25" font-size="18" fill="black">Superior Izquierdo</text>
+            <text x="430" y="25" font-size="18" fill="black">Superior Derecho</text>
+            <text x="70" y="110" font-size="18" fill="black">Inferior Izquierdo</text>
+            <text x="430" y="110" font-size="18" fill="black">Inferior Derecho</text>
+
+            <!-- Superior Izquierdo -->
+            <g *ngFor="let tooth of teethSuperiorIzquierdo" (click)="toggleTooth(tooth.id)">
+              <circle [attr.cx]="tooth.cx" [attr.cy]="tooth.cy" r="20"
+                [attr.fill]="editingItem?.get('teeth')?.value?.includes(tooth.id) ?  '#10b981' : 'lightgray'"
+                stroke="black" />
+              <text [attr.x]="tooth.cx" [attr.y]="tooth.cy + 5" text-anchor="middle" font-size="16" fill="black">{{
+                tooth.label }}</text>
+            </g>
+
+            <!-- Superior Derecho -->
+            <g *ngFor="let tooth of teethSuperiorDerecho" (click)="toggleTooth(tooth.id)">
+              <circle [attr.cx]="tooth.cx" [attr.cy]="tooth.cy" r="20"
+                [attr.fill]="editingItem?.get('teeth')?.value?.includes(tooth.id) ? '#10b981' : 'lightgray'"
+                stroke="black" />
+              <text [attr.x]="tooth.cx" [attr.y]="tooth.cy + 5" text-anchor="middle" font-size="16" fill="black">{{
+                tooth.label }}</text>
+            </g>
+
+            <!-- Inferior Izquierdo -->
+            <g *ngFor="let tooth of teethInferiorIzquierdo" (click)="toggleTooth(tooth.id)">
+              <circle [attr.cx]="tooth.cx" [attr.cy]="tooth.cy" r="20"
+                [attr.fill]="editingItem?.get('teeth')?.value?.includes(tooth.id) ? '#10b981' : 'lightgray'"
+                stroke="black" />
+              <text [attr.x]="tooth.cx" [attr.y]="tooth.cy + 5" text-anchor="middle" font-size="16" fill="black">{{
+                tooth.label }}</text>
+            </g>
+
+            <!-- Inferior Derecho -->
+            <g *ngFor="let tooth of teethInferiorDerecho" (click)="toggleTooth(tooth.id)">
+              <circle [attr.cx]="tooth.cx" [attr.cy]="tooth.cy" r="20"
+                [attr.fill]="editingItem?.get('teeth')?.value?.includes(tooth.id) ? '#10b981' : 'lightgray'"
+                stroke="black" />
+              <text [attr.x]="tooth.cx" [attr.y]="tooth.cy + 5" text-anchor="middle" font-size="16" fill="black">{{
+                tooth.label }}</text>
+            </g>
+          </svg>
+        </div>
+
+      </div>
+    </form>
+    <ng-template #footer>
+      <p-button label="Cancelar" icon="pi pi-times" text (click)="itemDialog = false" />
+      <p-button label="Guardar" icon="pi pi-check" *ngIf="!isLabView" (click)="saveItem()"
+        [disabled]="editingItem?.invalid" />
+    </ng-template>
+  </ng-container>
+</p-dialog>

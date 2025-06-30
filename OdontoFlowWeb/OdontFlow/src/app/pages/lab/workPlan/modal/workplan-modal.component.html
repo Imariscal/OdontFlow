@@ -1,0 +1,73 @@
+<p-dialog [(visible)]="showDialog" [style]="{ width: '800px' }" [closeOnEscape]="false" (onHide)="closeClick()"
+  header="Detalles del Plan" [modal]="true">
+  <form [formGroup]="form" class="p-fluid">
+    <div class="flex flex-col gap-6">
+      <div class="col-span-6">
+        <label for="name" class="block font-bold mb-3">Nombre <small class="text-red-500">*</small>:</label>
+        <input id="name" type="text"
+        [ngClass]="name?.errors && (name?.touched || name?.dirty) ? 'ng-invalid ng-dirty' : ''" 
+        pInputText formControlName="name" autofocus fluid />    
+        <small class="text-red-500"  *ngIf="name?.errors && (name?.touched || name?.dirty)">
+          <ng-container *ngIf="name?.hasError('required')">Este campo es obligatorio.</ng-container>
+          <ng-container *ngIf="name?.hasError('minlength')">Mínimo {{ name?.errors?.['minlength']?.requiredLength }} caracteres.</ng-container>
+        </small>
+      </div>
+      <div class="col-span-6">
+        
+      </div>
+    </div>
+    <div class="flex flex-col gap-6">
+      <div class="col-span-6 mt-3">
+        <label for="name" class="block font-bold mb-3 mr-5">Activo : 
+          <p-toggleswitch  
+            formControlName="active"
+            class=" ml-5 mt-2" /></label>
+      </div>
+    </div>
+    <div class="flex flex-col gap-6">
+      <p-tabs value="0">  
+        <p-tablist>
+          <p-tab value="0">Estaciones
+            <ng-container *ngIf="workStationsSelected.length > 0">
+              <span
+                class="ml-2 inline-flex items-center justify-center text-xs font-bold text-white bg-red-500 rounded-full w-5 h-5">
+                {{ workStationsSelected.length }}
+              </span>
+            </ng-container>
+          </p-tab>
+          <p-tab value="1">Productos
+            <ng-container *ngIf="selectedProducts.length > 0">
+              <span
+                class="ml-2 inline-flex items-center justify-center text-xs font-bold text-white bg-red-500 rounded-full w-5 h-5">
+                {{ selectedProducts.length }}
+              </span>
+            </ng-container>
+          </p-tab>
+        </p-tablist>
+        <p-tabpanels>
+          <p-tabpanel value="0">
+            <p-picklist [source]="workStations" [target]="workStationsSelected" [dragdrop]="true" [responsive]="true"
+            [sourceStyle]="{ height: '30rem' }" [targetStyle]="{ height: '30rem' }" filterBy="name"
+            sourceFilterPlaceholder="Search by name" targetFilterPlaceholder="Search by name" breakpoint="1400px"
+            scrollHeight="30rem">      
+          </p-picklist>    
+          </p-tabpanel>
+          <p-tabpanel value="1">
+            <p-picklist [source]="products" [target]="selectedProducts" [dragdrop]="true" [responsive]="true"
+            [sourceStyle]="{ 'min-height': '30rem' }"
+            [targetStyle]="{ 'min-height': '30rem' }"
+            filterBy="name"
+            sourceFilterPlaceholder="Search by name" targetFilterPlaceholder="Search by name" breakpoint="1400px"
+            scrollHeight="30rem">
+            </p-picklist>
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>    
+    </div>
+  </form>  
+
+  <ng-template #footer>
+    <p-button label="Cancelar" icon="pi pi-times" text  (click)="closeClick()" />
+    <p-button label="Guardar" icon="pi pi-check" [disabled]="!form.valid" (click)="saveClick()" />
+  </ng-template>
+</p-dialog>

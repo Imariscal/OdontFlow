@@ -1,0 +1,44 @@
+<p-dialog [(visible)]="showDialog" [style]="{ width: '600px', height: '400px' }" [closeOnEscape]="false" (onHide)="closeClick()"
+  header="Configurar Producto" [modal]="true">
+  <form [formGroup]="form" class="p-fluid">
+    <div class="flex flex-col gap-6">
+      <div>
+        <label for="name" class="block font-bold mb-3">Producto :</label>
+        <p-select [(ngModel)]="selectedProduct" (onChange)="onProductSelected($event.value)" [options]="products"
+          optionLabel="name" placeholder="Selecciona un producto" formControlName="productId" fluid>
+          <ng-template let-item pTemplate="item">
+            <div class="p-d-flex p-jc-between">
+              <span>{{ item.name }}</span>
+              <span class="text-muted ml-2">Precio Unitario : ({{ item.priceFormatted }})</span>
+            </div>
+          </ng-template>
+        </p-select>
+      </div>
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-6">
+          <label for="name" class="block font-bold mb-4">Precio Producto :</label>
+          <p-inputNumber id="productPrice" [disabled]="true" formControlName="productPrice" mode="currency"
+            currency="MXN" locale="es-MX" fluid />
+        </div>
+        <div class="col-span-6">
+          <label for="name" class="block font-bold mb-4">Precio Lista :</label>
+          <p-inputNumber id="price" formControlName="price"
+            [ngClass]="price?.errors && (price?.touched || price?.dirty) ? 'ng-invalid ng-dirty' : ''" mode="currency"
+            currency="MXN" locale="es-MX" fluid />
+          <small class="text-red-500" *ngIf="price?.errors && (price?.touched || price?.dirty)">
+            <ng-container *ngIf="price?.hasError('required')">Este campo es obligatorio.</ng-container>
+          </small>
+        </div>
+      </div>
+      <div>
+        <label for="comments" class="block font-bold mb-3">Comentarios :</label>
+        <textarea id="comments" pTextarea formControlName="comments" rows="3" cols="20" fluid></textarea>
+      </div>
+    </div>
+  </form>
+  <ng-template #footer>
+    <p-button label="Cancelar" icon="pi pi-times" text (click)="closeClick()" />
+    <p-button label="Guardar" icon="pi pi-check" [disabled]="!form.valid" (click)="saveClick()" />
+  </ng-template>
+
+</p-dialog>

@@ -1,0 +1,122 @@
+<p-dialog [(visible)]="showDialog" [style]="{ width: '650px' }"
+[closeOnEscape]="false"   (onHide)="closeClick()"
+ header="Detalles del Proveedor" [modal]="true">
+  <form [formGroup]="form" class="p-fluid">
+    <p-tabs value="0">
+      <p-tablist>
+        <p-tab value="0">Contacto</p-tab>
+        <p-tab value="1">Cobranza</p-tab>
+      </p-tablist>
+      <p-tabpanels>
+      <p-tabpanel value="0">
+          <div class="flex flex-col gap-6">
+            <div>
+              <label for="nombre" class="block font-bold mb-3">Nombre :</label>
+              <input id="nombre" type="text"
+                [ngClass]="name?.errors && (name?.touched || name?.dirty) ? 'ng-invalid ng-dirty' : ''" pInputText
+                formControlName="name" autofocus fluid />
+              <small class="text-red-500" *ngIf="name?.errors && (name?.touched || name?.dirty)">
+                <ng-container *ngIf="name?.hasError('required')">Este campo es obligatorio.</ng-container>
+                <ng-container *ngIf="name?.hasError('minlength')">Mínimo {{ name?.errors?.['minlength']?.requiredLength
+                  }} caracteres.</ng-container>
+              </small>
+            </div>
+            <div>
+              <label for="contact" class="block font-bold mb-3">Contacto :</label>
+              <input id="contact" type="text"
+                [ngClass]="contact?.errors && (contact?.touched || contact?.dirty) ? 'ng-invalid ng-dirty' : ''"
+                pInputText formControlName="contact" autofocus fluid />
+              <small class="text-red-500" *ngIf="contact?.errors && (contact?.touched || contact?.dirty)">
+                <ng-container *ngIf="contact?.hasError('required')">Este campo es obligatorio.</ng-container>
+                <ng-container *ngIf="contact?.hasError('minlength')">Mínimo {{
+                  name?.errors?.['minlength']?.requiredLength }} caracteres.</ng-container>
+              </small>
+            </div>
+            <div>
+              <label for="email" class="block font-bold mb-3">Email :</label>
+              <input id="email" type="text"
+                [ngClass]="email?.errors && (email?.touched || email?.dirty) ? 'ng-invalid ng-dirty' : ''" pInputText
+                formControlName="email" autofocus fluid />
+              <small class="text-red-500" *ngIf="email?.errors && (email?.touched || email?.dirty)">
+                <ng-container *ngIf="email?.hasError('required')">Este campo es obligatorio.</ng-container>
+                <ng-container *ngIf="email?.hasError('email')">Debe ingresar un email valido.</ng-container>
+              </small>
+            </div>
+            <div class="grid grid-cols-12 gap-4">
+              <div class="col-span-6">
+                <span class="block font-bold mb-4">Teléfono :</span>
+                <input id="phone1" type="tel" pInputText formControlName="phone1" fluid />
+                <small class="text-red-500" *ngIf="phone?.errors && (phone?.touched || phone?.dirty)">
+                  <ng-container *ngIf="phone?.hasError('required')">Este campo es obligatorio.</ng-container>
+                </small>
+              </div>
+              <div class="col-span-6">
+                <span class="block font-bold mb-4">Teléfono Adicional :</span>
+                <input id="phone2" type="tel" pInputText formControlName="phone2" fluid />
+              </div>
+            </div>
+            <div>
+              <label for="address" class="block font-bold mb-3">Dirección :</label>
+              <textarea id="address" pTextarea formControlName="address" rows="2" cols="20" fluid></textarea>
+            </div>
+            <div>
+              <label for="product" class="block font-bold mb-3">Producto :</label>
+              <input id="product" pInputText type="text" formControlName="product" fluid />
+            </div>
+            <div class="col-span-6">
+              <label for="name" class="block font-bold mb-3 mr-5">Activo : 
+                <p-toggleswitch  
+                  formControlName="active"
+                  class=" ml-5 mt-2" /></label>      
+            </div>
+          </div>
+      </p-tabpanel>
+      <p-tabpanel value="1">
+          <div class="flex flex-col gap-6">
+            <div>
+              <label for="bankDetails" class="block font-bold mb-3">Detalles Bancarios :</label>
+              <textarea id="bankDetails" pTextarea formControlName="bankDetails" rows="2" cols="20" fluid></textarea>
+            </div>
+
+            <div>
+              <label for="invoiceContact" class="block font-bold mb-3">Contacto :</label>
+              <input id="invoiceContact" pInputText type="text" formControlName="invoiceContact" fluid />
+            </div>
+            <div class="grid grid-cols-12 gap-4">
+              <div class="col-span-6">
+                <label for="invoiceEmail" class="block font-bold mb-3">Correo :</label>
+                <input id="invoiceEmail" type="email" pInputText formControlName="invoiceEmail" fluid />
+
+              </div>
+              <div class="col-span-6">
+                <label for="invoicePhone" class="block font-bold mb-3">Teléfono :</label>
+                <input id="invoicePhone" type="tel" pInputText formControlName="invoicePhone" fluid />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-12 gap-4">
+              <div class="col-span-6">
+                <label for="account" class="block font-bold mb-3">Cuenta :</label>
+                <input id="account" type="email" pInputText formControlName="account" fluid />
+
+              </div>
+              <div class="col-span-6">
+                <label for="credit" class="block font-bold mb-3">Credito :</label>
+                <p-inputNumber id="credit" formControlName="credit" mode="currency" currency="MXN" locale="es-MX" fluid />
+              </div>
+            </div>
+
+            <div>
+              <label for="comments" class="block font-bold mb-3">Commentarios :</label>
+              <textarea id="comments" pTextarea formControlName="comments" rows="5" cols="20" fluid></textarea>
+            </div>
+          </div>
+       </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </form> 
+  <ng-template #footer>
+    <p-button label="Cancelar" icon="pi pi-times" text (click)="closeClick()" />
+    <p-button label="Guardar" icon="pi pi-check" [disabled]="!form.valid" (click)="saveClick()" />
+  </ng-template>
+</p-dialog>

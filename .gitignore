@@ -1,0 +1,67 @@
+#########################
+# .NET (.NET Core, ASP.NET) 
+#########################
+
+## Build results
+**/bin/
+**/obj/
+**/out/
+
+## User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Rider & VSCode
+.idea/
+.vscode/
+
+## Log files
+*.log
+
+## Others
+*.vs/
+*.dbmdl
+*.db
+*.DS_Store
+
+#########################
+# Angular / Node
+#########################
+
+# compiled output
+**/dist/
+**/tmp/
+**/out-tsc/
+
+# dependencies
+**/node_modules/
+
+# Angular build artifacts
+.angular/
+
+# environment files
+src/environments/*.ts
+!src/environments/environment*.ts
+
+# system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDEs
+*.sublime-workspace
+*.sublime-project
+*.code-workspace
+
+#########################
+# OS
+#########################
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db

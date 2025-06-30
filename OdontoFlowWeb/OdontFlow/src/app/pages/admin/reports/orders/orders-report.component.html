@@ -1,0 +1,273 @@
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <div class="w-full flex justify-start gap-2">
+      <p-button label="Filtros Avanzados" icon="pi pi-sliders-h"
+        (click)="advancedFiltersVisible = !advancedFiltersVisible" />
+      <h5 class="m-0 ml-4">Reporte de Órdenes</h5>
+    </div>
+  </ng-template>
+  <ng-template #end>
+    <p-button label="Exportar" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
+  </ng-template>
+</p-toolbar>
+
+
+<!-- Filtros Avanzados -->
+<p-panel [toggleable]="true" [collapsed]="!advancedFiltersVisible" [style]="{ 'margin-bottom': '2rem' }"
+  header="Filtros de búsqueda">
+  <div class="grid grid-cols-12 gap-4 items-end">
+
+    <div class="col-span-12 md:col-span-3">
+      <label class="block font-bold mb-1">Buscar por orden, cliente o paciente</label>
+      <input pInputText [(ngModel)]="filters.search" class="w-full" />
+    </div>
+
+    <div class="col-span-12 md:col-span-2">
+      <label class="block font-bold mb-1">Estatus</label>
+      <p-dropdown [options]="statusOptions" [(ngModel)]="filters.orderStatusId" optionLabel="label" optionValue="value"
+        placeholder="Selecciona" class="w-full" />
+    </div>
+
+    <div class="col-span-12 md:col-span-2">
+      <label class="block font-bold mb-1">Grupo</label>
+      <p-dropdown [options]="groupOptions" [(ngModel)]="filters.groupId" optionLabel="label" optionValue="value"
+        placeholder="Selecciona" class="w-full" />
+    </div>
+
+    <div class="col-span-12 md:col-span-2">
+      <label class="block font-bold mb-1">Fecha Creación (Inicio)</label>
+      <p-datepicker [(ngModel)]="filters.creationDateStart" dateFormat="dd/mm/yy" appendTo="body"
+        [iconDisplay]="'input'" [showIcon]="true" inputId="creationStart" fluid />
+    </div>
+
+    <div class="col-span-12 md:col-span-2">
+      <label class="block font-bold mb-1">Fecha Creación (Fin)</label>
+      <p-datepicker [(ngModel)]="filters.creationDateEnd" dateFormat="dd/mm/yy" appendTo="body" [iconDisplay]="'input'"
+        [showIcon]="true" inputId="creationEnd" fluid />
+    </div>
+
+    <div class="col-span-12 md:col-span-1 flex justify-end">
+      <p-button icon="pi pi-search" label="Buscar" (onClick)="search()"
+        styleClass="p-button-success w-full md:w-auto" />
+    </div>
+
+    <div class="col-span-12 md:col-span-1 flex justify-start">
+      <p-button icon="pi pi-refresh" label="Limpiar" (onClick)="clearFilters()" severity="secondary" [outlined]="true"
+        styleClass="w-full md:w-auto" />
+    </div>
+
+  </div>
+</p-panel>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+  <div class="relative flex flex-col p-4 border rounded-lg shadow-md bg-white">
+    <div class="text-gray-500 text-sm">Ordenes Totales / Productos Totales </div>
+    <div class="text-2xl font-bold text-gray-800 mt-2">{{ indicators.totalOrders }} / {{ indicators.totalProducts }}
+    </div>
+  </div>
+
+
+  <div class="relative flex flex-col p-4 border rounded-lg shadow-md bg-white">
+    <div class="text-gray-500 text-sm">Pagadas / Por Pagar</div>
+    <div class="text-2xl font-bold text-gray-800 mt-2">{{ indicators.totalPagadas }} / {{ indicators.totalPendientes }}
+    </div>
+  </div>
+
+  <div class="relative flex flex-col p-4 border rounded-lg shadow-md bg-white">
+
+    <div class="text-gray-500 text-sm">Con Factura / Sin Factura </div>
+    <div class="text-2xl font-bold text-gray-800 mt-2">{{ indicators.totalFacturadas }} / {{ indicators.totalSinFactura
+      }}</div>
+  </div>
+
+
+
+  <!-- Total Balance Pendiente -->
+  <div class="relative flex flex-col p-4 border rounded-lg shadow-md bg-white">
+    <div class="text-gray-500 text-sm">Balance Pendiente</div>
+    <div class="text-2xl font-bold text-red-500 mt-2">{{ indicators.totalBalancePendiente | currency:'MXN' }}</div>
+  </div>
+
+  <!-- Total Pagado -->
+  <div class="relative flex flex-col p-4 border rounded-lg shadow-md bg-white">
+    <div class="text-gray-500 text-sm">Total Pagado</div>
+    <div class="text-2xl font-bold text-green-600 mt-2">{{ indicators.totalPagado | currency:'MXN' }}</div>
+  </div>
+
+  <!-- Subtotal General -->
+  <div class="relative flex flex-col p-4 border rounded-lg shadow-md bg-white">
+    <div class="text-gray-500 text-sm">Subtotal General</div>
+    <div class="text-2xl font-bold text-gray-800 mt-2">{{ indicators.subtotalGeneral | currency:'MXN' }}</div>
+  </div>
+
+  <!-- IVA General -->
+  <div class="relative flex flex-col p-4 border rounded-lg shadow-md bg-white">
+    <div class="text-gray-500 text-sm">IVA General</div>
+    <div class="text-2xl font-bold text-gray-800 mt-2">{{ indicators.ivaGeneral | currency:'MXN' }}</div>
+  </div>
+
+  <!-- Total General -->
+  <div class="relative flex flex-col p-4 border rounded-lg shadow-md bg-white">
+    <div class="text-gray-500 text-sm">Total General</div>
+    <div class="text-2xl font-bold text-gray-800 mt-2">{{ indicators.totalGeneral | currency:'MXN' }}</div>
+  </div>
+</div>
+
+
+<!-- Tabla Principal -->
+<div class="grid grid-cols-12 gap-4 mt-8">
+  <div class="col-span-12  ">
+    <p-card>
+      <p-table #dt [value]="entities" 
+      scrollable="true"
+      [scrollHeight]="scrollHeight" 
+      [paginator]="true" [rows]="50" [rowsPerPageOptions]="[50, 100, 150]"
+        [rowHover]="true" dataKey="id" [expandedRowKeys]="expandedRows" [(selection)]="selectedEntities"
+        [globalFilterFields]="['barcode', 'clientName', 'patientName']">
+
+        <ng-template #header>
+          <tr>
+            <th pFrozenColumn></th>
+            <th pSortableColumn="workGroup" pFrozenColumn>Grupo <p-sortIcon field="workGroup" /></th>
+            <th pSortableColumn="barcode" pFrozenColumn>Orden <p-sortIcon field="barcode" /></th>
+            <th pSortableColumn="creationDate" pFrozenColumn>Fecha Alta <p-sortIcon field="creationDate" /></th>
+            <th pSortableColumn="clientName" pFrozenColumn>Cliente <p-sortIcon field="clientName" /></th>
+            <th pSortableColumn="patientName" pFrozenColumn>Paciente <p-sortIcon field="patientName" /></th>
+            <th pSortableColumn="items.length">Productos <p-sortIcon field="items.length" /></th>
+            <th pSortableColumn="orderStatus">Estado <p-sortIcon field="orderStatus" /></th>
+            <th pSortableColumn="entity.payments?.length"># Pagos <p-sortIcon field="entity.payments?.length" /></th>
+            <th pSortableColumn="payment">Pagos <p-sortIcon field="payment" /></th>
+            <th pSortableColumn="balance">Balance <p-sortIcon field="balance" /></th>
+            <th pSortableColumn="subtotal">Subtotal <p-sortIcon field="subtotal" /></th>
+            <th pSortableColumn="tax">IVA <p-sortIcon field="tax" /></th>
+            <th pSortableColumn="total">Total <p-sortIcon field="total" /></th>
+            <th pSortableColumn="applyInvoice">Factura <p-sortIcon field="applyInvoice" /></th>
+            <th pSortableColumn="paymentComplete">Pagado <p-sortIcon field="paymentComplete" /></th>
+            <th pSortableColumn="paymentDate">Fecha Pago <p-sortIcon field="paymentDate" /></th>
+            <th pSortableColumn="commitmentDate">Fecha Compromiso <p-sortIcon field="commitmentDate" /></th>
+            <th pSortableColumn="deliveryDate">Fecha Entrega <p-sortIcon field="deliveryDate" /></th>
+          </tr>
+        </ng-template>
+
+
+        <ng-template #body let-entity let-expanded="expanded">
+          <tr>
+            <td pFrozenColumn>
+              <p-button type="button" pRipple [pRowToggler]="entity" [text]="true" [rounded]="true" [plain]="true"
+                [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'">
+              </p-button>
+            </td>
+            <td pFrozenColumn>{{ entity.workGroup }}</td>
+            <td pFrozenColumn>
+              <p-button label="{{ entity.barcode }}" class="p-0" styleClass="p-button-link text-green-600"
+                (onClick)="openOrderModal(entity)"></p-button>
+            </td>
+            <td pFrozenColumn>{{ entity.creationDate | date : 'dd/MM/yyyy' }}</td>
+            <td pFrozenColumn>{{ entity.clientName }}</td>
+            <td>{{ entity.patientName }}</td>
+            <td>{{ entity.items.length }}</td>
+            <td>
+              <p-tag [value]="entity.orderStatus" [severity]="getStatusSeverity(entity.orderStatus)"></p-tag>
+            </td>
+            <td>{{ entity.payments?.length }}</td>
+            <td><strong>{{ entity.payment | currency }}</strong></td>
+            <td><strong>{{ entity.balance | currency }}</strong></td>
+            <td><strong>{{ entity.subtotal | currency }}</strong></td>
+            <td><strong>{{ entity.tax | currency }}</strong></td>
+            <td><strong>{{ entity.total | currency }}</strong></td>
+            <td>
+              <p-tag [value]="entity.applyInvoice ? 'Sí' : 'No'"
+                [severity]="entity.applyInvoice ? 'success' : 'warn'"></p-tag>
+            </td>
+            <td>
+              <p-tag [value]="entity.paymentComplete ? 'Sí' : 'No'"
+                [severity]="entity.paymentComplete ? 'success' : 'warn'"></p-tag>
+            </td>
+            <td>{{ entity.paymentComplete ? (entity.paymentDate | date : 'dd/MM/yyyy') : '' }}</td>
+            <td>{{ entity.commitmentDate | date : 'dd/MM/yyyy' }}</td>
+            <td>{{ entity.orderStatusId == 5 ? (entity.deliveryDate | date : 'dd/MM/yyyy') : '' }}</td>
+          </tr>
+        </ng-template>
+
+        <!-- EXPANSION: Productos de la orden -->
+        <ng-template #expandedrow let-entity>
+          <tr>
+            <td colspan="16">
+              <!-- Productos de la orden -->
+              <div>
+                <h3 class="mb-3 font-bold text-sm text-gray-900">Productos relacionados</h3>
+
+                <p-table [value]="entity.items" [tableStyle]="{ 'min-width': '60rem' }">
+                  <ng-template pTemplate="header">
+          <tr>
+            <th>Cantidad</th>
+            <th>Producto</th>
+            <th>Piezas</th>
+            <th>Costo Unitario</th>
+            <th>IVA Unitario</th>
+            <th>Subtotal</th>
+            <th>IVA Total</th>
+            <th>Total</th>
+
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item>
+          <tr>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.productName }}</td>
+            <td>{{ item.teethNames }}</td>
+            <td><strong> {{ item.unitCost | currency }} </strong></td>
+            <td><strong> {{ item.unitTax | currency }}</strong></td>
+            <td><strong>{{ (item.unitCost * item.quantity) | currency }}</strong></td>
+            <td><strong>{{ (item.unitTax * item.quantity) | currency }}</strong></td>
+            <td><strong>{{ item.totalCost | currency }}</strong></td>
+
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="8" class="text-center">No hay productos para esta orden.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+  </div>
+  <!-- Pagos de la orden -->
+  <div *ngIf="entity.payments?.length">
+    <h3 class="mb-3 font-bold text-sm text-gray-900">Pagos relacionados</h3>
+    <p-table [value]="entity.payments" [tableStyle]="{ 'min-width': '40rem' }">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Fecha</th>
+          <th>Método</th>
+          <th>Referencia</th>
+          <th>Monto</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-payment>
+        <tr>
+          <td>{{ payment.creationDate | date:'dd/MM/yyyy' }}</td>
+          <td>{{ payment.paymentType }}</td>
+          <td>{{ payment.reference }}</td>
+          <td>{{ payment.amount | currency:'MXN' }}</td>
+
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5" class="text-center">No hay pagos registrados.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+  </td>
+  </tr>
+  </ng-template>
+
+      </p-table>
+    </p-card>
+</div>
+</div>
+
+
+<app-order-modal [showDialog]="showDialog" *ngIf="this.orderEntity" [entity]="this.orderEntity"
+  (onClose)="showDialog = false"></app-order-modal>

@@ -1,0 +1,9 @@
+﻿public enum PAYMENT_TYPE
+{
+    EFECTIVO = 1,
+    TRANSFERENCIA,
+    CHEQUE,
+    TARJETA_DE_CREDITO,
+    DEPOSITO, 
+    OTRO
+}

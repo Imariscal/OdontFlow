@@ -1,0 +1,63 @@
+<p-dialog [(visible)]="showDialog" [style]="{ width: '600px' }"
+[closeOnEscape]="false"   (onHide)="closeClick()"
+header="Detalles del Producto" [modal]="true">
+  <form [formGroup]="form" class="p-fluid">
+    <div class="flex flex-col gap-6">
+      <div>
+        <label for="name" class="block font-bold mb-3">Nombre :</label>
+        <input id="name" type="text"
+        [ngClass]="name?.errors && (name?.touched || name?.dirty) ? 'ng-invalid ng-dirty' : ''" 
+        pInputText formControlName="name" autofocus fluid />    
+        <small class="text-red-500"  *ngIf="name?.errors && (name?.touched || name?.dirty)">
+          <ng-container *ngIf="name?.hasError('required')">Este campo es obligatorio.</ng-container>
+          <ng-container *ngIf="name?.hasError('minlength')">Mínimo {{ name?.errors?.['minlength']?.requiredLength }} caracteres.</ng-container>
+        </small>
+      </div>
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-6">
+          <span class="block font-bold mb-4">Categoría <small class="text-red-500">*</small>:</span>
+          <div class="grid grid-cols-12 gap-4">
+            <div *ngFor="let cat of categories" class="flex items-center gap-2 col-span-6">
+              <p-radioButton [inputId]="cat.value" name="categoryId" [value]="cat.value" formControlName="categoryId" />
+              <label [for]="cat.value">{{ cat.label }}</label>
+            </div>
+          </div>
+        </div>
+        <div class="col-span-6">
+          <label for="name" class="block font-bold mb-3">Precio <small class="text-red-500">*</small>:</label>
+          <p-inputNumber id="price" formControlName="price"
+          [ngClass]="price?.errors && (price?.touched || price?.dirty) ? 'ng-invalid ng-dirty' : ''" 
+          mode="currency" currency="MXN" locale="es-MX" fluid />
+          <small class="text-red-500"  *ngIf="price?.errors && (price?.touched || price?.dirty)">
+            <ng-container *ngIf="price?.hasError('required')">Este campo es obligatorio.</ng-container>   
+            <ng-container *ngIf="price?.hasError('min')">Este campo debe ser igual o mayor a 1.</ng-container>                 
+          </small>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-6"> 
+          <p-checkbox formControlName="applyDiscount"  [binary]="true"   />
+          <label for="applyDiscount" class="ml-2">Aplica Descuento</label>
+        </div>
+        <div class="col-span-6">  
+          <p-checkbox formControlName="isLabelRequired" [binary]="true"  />
+          <label for="isLabelRequired" class="ml-2">Impresión de etiqueta:</label>
+        </div>
+      </div>
+      
+      <div class="col-span-6">
+        <label for="name" class="block font-bold mb-3 mr-5">Activo : 
+          <p-toggleswitch  
+            formControlName="active"
+            class=" ml-5 mt-2" /></label>
+
+      </div>
+    </div>
+  </form>
+    <ng-template #footer>
+      <p-button label="Cancelar" icon="pi pi-times" text (click)="closeClick()" />
+      <p-button label="Guardar" icon="pi pi-check" [disabled]="!form.valid" (click)="saveClick()" />
+    </ng-template>
+ 
+</p-dialog>

@@ -1,0 +1,71 @@
+<p-dialog [(visible)]="showDialog" [style]="{ width: '750px' }" [closeOnEscape]="false" (onHide)="closeClick()"
+  header="Detalles de Empleado" [modal]="true" [draggable]="false" [resizable]="false">
+  <form [formGroup]="form" class="p-fluid">
+    <div class="flex flex-col">
+      <!-- Nombre -->
+
+      <div class="flex flex-col gap-6">
+        <div>
+          <label for="name" class="block font-bold mb-3">Nombre <small class="text-red-500">*</small>:</label>
+          <input id="name" type="text"
+            [ngClass]="name?.errors && (name?.touched || name?.dirty) ? 'ng-invalid ng-dirty' : ''" pInputText
+            formControlName="name" autofocus fluid />
+          <small class="text-red-500" *ngIf="name?.errors && (name?.touched || name?.dirty)">
+            <ng-container *ngIf="name?.hasError('required')">Este campo es obligatorio.</ng-container>
+            <ng-container *ngIf="name?.hasError('minlength')">Mínimo {{ name?.errors?.['minlength']?.requiredLength }}
+              caracteres.</ng-container>
+          </small>
+        </div>
+        <div>
+          <label for="email" class="block font-bold mb-3">
+            Email <small class="text-red-500"> *</small>
+          </label>
+          <input id="email" pInputText formControlName="email"
+            [ngClass]="email?.errors && (email?.touched || email?.dirty) ? 'ng-invalid ng-dirty' : ''" fluid />
+          <small class="text-red-500"
+            *ngIf="email?.errors && (email?.touched || email?.dirty) && email?.value === 'true'">
+            <ng-container *ngIf="email?.hasError('required')">Este campo es obligatorio.</ng-container>
+            <ng-container *ngIf="email?.hasError('email')">Correo inválido.</ng-container>
+          </small>
+        </div>
+      </div>
+      <!-- Flags y comisión -->
+      <div class="grid grid-cols-12 gap-4 mt-5">
+        <div class="col-span-4 mt-5">
+          <p-checkbox formControlName="isSalesRepresentative" [binary]="true" />
+          <label class="ml-2">Representante Ventas</label>
+        </div>
+        <div class="col-span-4 mt-5">
+          <p-checkbox formControlName="applyCommission" [binary]="true" />
+          <label class="ml-2">Aplica Comisión</label>
+        </div>
+        <div class="col-span-4">
+          <label class="block font-bold mb-3">% Comisión:</label>
+          <p-inputNumber formControlName="commissionPercentage" mode="decimal" [minFractionDigits]="0"
+            [maxFractionDigits]="2" [min]="0" [max]="100" [useGrouping]="false"
+            [ngClass]="commissionPercentage?.invalid && (commissionPercentage?.touched || commissionPercentage?.dirty) ? 'ng-invalid ng-dirty' : ''" />
+          <small class="text-red-500"
+            *ngIf="commissionPercentage?.invalid && (commissionPercentage?.touched || commissionPercentage?.dirty)">
+            <ng-container *ngIf="commissionPercentage?.hasError('min')">No puede ser menor a 0%</ng-container>
+            <ng-container *ngIf="commissionPercentage?.hasError('max')">No puede ser mayor a 100%</ng-container>
+          </small>
+        </div>
+
+        <!-- Toggle activo -->
+        <div class="col-span-6">
+          <label class="block font-bold mb-3 mr-5">Activo:
+            <p-toggleswitch formControlName="active" class="ml-5 mt-2" />
+          </label>
+        </div>
+      </div>
+ 
+      
+    </div>
+  </form>
+
+  <!-- Footer -->
+  <ng-template #footer>
+    <p-button label="Cancelar" icon="pi pi-times" text (click)="closeClick()" />
+    <p-button label="Guardar" icon="pi pi-check" [disabled]="form.invalid" (click)="saveClick()" />
+  </ng-template>
+</p-dialog>

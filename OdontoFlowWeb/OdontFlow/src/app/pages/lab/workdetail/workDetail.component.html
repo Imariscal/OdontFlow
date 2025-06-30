@@ -1,0 +1,338 @@
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <h5 class="m-0">Detalle Estaciones</h5>
+  </ng-template>
+</p-toolbar>
+
+
+<div class="grid grid-cols-12 gap-4 mb-6">
+  <!-- DONUT CHART -->
+  <div class="col-span-12 sm:col-span-6 lg:col-span-2">
+    <p-card >
+      <h3 class="text-md font-semibold text-center mb-3">Resumen</h3>
+      <p-chart type="doughnut" [data]="donutData" [options]="donutOptions" class="h-[3rem]" />
+      <div class="text-center text-sm mt-3">
+        Total: {{ trabajosEnTiempo + trabajosConAlarma + trabajosConRetraso + trabajosBloqueados }} trabajos
+      </div>
+    </p-card>
+  </div>
+  <!-- TRABAJOS A TIEMPO -->
+  <div class="col-span-12 sm:col-span-6 lg:col-span-2">
+    <div class="card h-[410px] flex flex-col">
+
+      <!-- Header -->
+      <div class="flex justify-between items-center">
+        <div>
+          <span class="block text-muted font-medium mb-2">Trabajos A Tiempo</span>
+          <div class="text-xl font-semibold text-green-600">{{ trabajosEnTiempo }}</div>
+        </div>
+        <div class="flex items-center justify-center">
+          <p-button icon="pi pi-filter" size="small" (onClick)="filterByStatus(1)" />
+        </div>
+      </div>
+
+      <!-- Scrollable list -->
+      <div class="mt-2 pr-2 overflow-y-auto flex-grow">
+        <ul class="pl-4 text-sm text-gray-700 list-disc">
+          <li *ngFor="let t of trabajosATiempoList">
+            <p-button label="{{ t.orderNumber }}" class="p-0" styleClass="p-button-link text-green-600"
+              (onClick)="openOrderModal(t)"></p-button>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- EN PROCESO -->
+  <div class="col-span-12 sm:col-span-6 lg:col-span-2">
+    <div class="card h-[410px] flex flex-col">
+      <div class="flex justify-between items-center">
+        <div>
+          <span class="block text-muted font-medium mb-2">Trabajos en progreso</span>
+          <div class="text-xl font-semibold">{{ totalTrabajosEnProceso }}</div>
+        </div>
+        <div class="flex flex-col items-center">
+          <div class="flex items-center justify-center">
+            <p-button icon="pi pi-filter" size="small" (onClick)="filterByWorking()" />
+          </div>
+        </div>
+      </div>
+      <div class="mt-2 pl-4 pr-2 overflow-y-auto flex-grow">
+        <ul class="text-sm text-gray-700 list-disc">
+          <li *ngFor="let t of trabajosEnProgresoList">
+            <i [ngClass]="getIconClass(t)"></i>
+            <p-button label="{{ t.orderNumber }}" class="p-0" [styleClass]="'p-button-link ' + getColorClass(t)"
+              (onClick)="openOrderModal(t)"></p-button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- CON ALARMA -->
+  <div class="col-span-12 sm:col-span-6 lg:col-span-2">
+    <div class="card h-[410px] flex flex-col">
+      <div class="flex justify-between items-center">
+        <div>
+          <span class="block text-muted font-medium mb-2">Trabajos con Alarma</span>
+          <div class="text-xl font-semibold text-orange-500">{{ trabajosConAlarma }}</div>
+        </div>
+        <div class="flex flex-col items-center">
+          <div class="flex items-center justify-center">
+            <p-button icon="pi pi-filter" size="small" (onClick)="filterByStatus(2)" />
+          </div>
+        </div>
+      </div>
+      <div class="mt-2 pl-4 pr-2 overflow-y-auto flex-grow">
+        <ul class="text-sm text-gray-700 list-disc">
+          <li *ngFor="let t of trabajosConAlarmaList">
+            <p-button label="{{ t.orderNumber }}" class="p-0" styleClass="p-button-link text-orange-500"
+              (onClick)="openOrderModal(t)"></p-button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+
+  <!-- CON RETRASO -->
+  <div class="col-span-12 sm:col-span-6 lg:col-span-2">
+    <div class="card h-[410px] flex flex-col">
+      <div class="flex justify-between items-center">
+        <div>
+          <span class="block text-muted font-medium mb-2">Trabajos con Retraso</span>
+          <div class="text-xl font-semibold text-red-500">{{ trabajosConRetraso }}</div>
+        </div>
+        <div class="flex flex-col items-center">
+          <div class="flex items-center justify-center">
+            <p-button icon="pi pi-filter" size="small" (onClick)="filterByStatus(3)" />
+          </div>
+        </div>
+      </div>
+      <div class="mt-2 pl-4 pr-2 overflow-y-auto flex-grow">
+        <ul class="text-sm text-gray-700 list-disc">
+          <li *ngFor="let t of trabajosConRetrasoList">
+            <p-button label="{{ t.orderNumber }}" class="p-0" styleClass="p-button-link text-red-500"
+              (onClick)="openOrderModal(t)"></p-button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+
+  <!-- CON RECHAZDOS -->
+  <div class="col-span-12 sm:col-span-6 lg:col-span-2">
+    <div class="card h-[410px] flex flex-col">
+      <div class="flex justify-between items-center">
+        <div>
+          <span class="block text-muted font-medium mb-2">Trabajos con Rechazo</span>
+          <div class="text-xl font-semibold text-red-500">{{ trabajosRechazados }}</div>
+        </div>
+        <div class="flex flex-col items-center">
+          <div class="flex items-center justify-center">
+            <p-button icon="pi pi-filter" size="small" (onClick)="filterByRechazado()" />
+          </div>
+        </div>
+      </div>
+      <div class="mt-2 pl-4 pr-2 overflow-y-auto flex-grow">
+        <ul class="text-sm text-gray-700 list-disc">
+          <li *ngFor="let t of trabajosConRehazoList">
+            <p-button label="{{ t.orderNumber }}" class="p-0" styleClass="p-button-link text-gray-500"
+              (onClick)="openOrderModal(t)"></p-button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="col-span-12 lg:col-span-12 xl:col-span-12">
+
+  <p-table #dt [value]="entities()" [rows]="10" [columns]="cols" [paginator]="true"
+    [globalFilterFields]="['orderNumber', 'clientName', 'productName']" [tableStyle]="{ 'min-width': '75rem' }" [(selection)]="emtitiesSelected"
+    [rowHover]="true" dataKey="id" 
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} records" [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[10, 20, 30]">
+    <ng-template #caption>
+      <div class="flex items-center justify-between">
+        <p-iconfield>
+          <p-inputicon styleClass="pi pi-search" />
+          <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+        </p-iconfield>
+        <p-iconfield>
+          <p-inputicon styleClass="pi pi-barcode" />
+          <input pInputText type="text" autofocus (keydown)="onGlobalBarcodeFilter(dt, $event)" placeholder="Numero Orden..." />
+      </p-iconfield>
+      </div>
+    </ng-template>
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="barcode">
+          # Orden
+          <p-sortIcon field="barcode" />
+          <p-columnFilter type="text" field="numeroOrden" display="menu" />
+        </th>
+        <th pSortableColumn="productName">
+          Producto
+          <p-sortIcon field="productName" />
+          <p-columnFilter type="text" field="productName" display="menu" />
+        </th>
+        <th pSortableColumn="orderColor">
+          Color
+          <p-sortIcon field="orderColor" />
+          <p-columnFilter type="text" field="productName" display="menu" />
+        </th>
+        <th pSortableColumn="clientName">
+          Client
+          <p-sortIcon field="clientName" />
+          <p-columnFilter type="text" field="clientName" display="menu" />
+        </th>
+        <th pSortableColumn="teethDetails">
+          Piezas
+          <p-sortIcon field="teethDetails" />
+        </th>
+        <th pSortableColumn="previousStationName">
+          Estación Anterior
+          <p-sortIcon field="previousStationName" />
+        </th>
+        <th pSortableColumn="previousEmployeeName">
+          Empleado Anterior
+          <p-sortIcon field="previousStationName" />
+        </th>
+        <th pSortableColumn="previousEndDate">
+          Fecha Ant. Termino
+          <p-sortIcon field="previousEndDate" />
+        </th>
+        <th pSortableColumn="stationStardDate">
+          Fecha Est. Inicio
+          <p-sortIcon field="stationStardDate" />
+        </th>
+        <th pSortableColumn="stationEndDate">
+          Fecha Est. Fin
+          <p-sortIcon field="stationEndDate" />
+        </th>
+        <th pSortableColumn="employeeStartDate">
+          Fecha Inicio
+          <p-sortIcon field="employeeStartDate" />
+        </th>
+ 
+        <th pSortableColumn="workedOnTime">
+          Tiempo
+          <p-sortIcon field="workedOnTime" />
+        </th>
+ 
+        <th pSortableColumn="workStatus">
+          Estado
+          <p-sortIcon field="workStatus" />
+          <p-columnFilter type="equals" field="workStatus" display="menu">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-dropdown 
+                [options]="statusOptions"
+                [showClear]="true"
+                [optionLabel]="'label'"
+                [optionValue]="'value'"
+                [ngModel]="value"
+                (onChange)="filter($event.value)"
+                placeholder="Seleccione Estado"
+                optionGroupChildren="items"
+              >
+                <ng-template let-option pTemplate="item">
+                  <div class="flex items-center gap-2">
+                    <i [ngClass]="getStatusIcon(option.value)"></i>
+                    <span>{{ option.label }}</span>
+                  </div>
+                </ng-template>
+              </p-dropdown>
+            </ng-template>
+          </p-columnFilter>
+        </th>
+        
+        <th></th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-product>
+      <tr [ngClass]="{'bg-yellow-200': product.barcode === highlightedOrderId}">
+        <td>
+          <p-button label="{{ product.barcode }}" class="p-0" styleClass="p-button-link text-primary"
+            (onClick)="openOrderModal(product)"></p-button>
+        </td>
+
+        <td>{{ product.productName }}</td>
+        <td>{{ product.orderColor }}</td>
+        <td>{{ product.clientName }}</td>
+        <td>{{ product.teethDetails }} </td>
+        <td>{{ product.previousStationName }}</td>
+        <td>{{ product.previousEmployeeName }}</td>
+        <td>{{ product.previousEndDate | date : 'dd/MM/yyy HH:mm' }}</td>
+        <td>{{ product.stationStartDate | date : 'dd/MM/yyy HH:mm' }}</td>
+        <td>{{ product.stationEndDate | date : 'dd/MM/yyy HH:mm' }}</td>
+        <td>{{ product.employeeStartDate | date : 'dd/MM/yyy HH:mm' }}</td> 
+   
+        <td>
+          <ng-container *ngIf="product.stationEndDate as stationEndDate">
+            <ng-container *ngIf="getDelayMinutes(stationEndDate) > 0; else aTiempo">
+              <p-tag [value]="'Retraso: ' + getDelayMinutes(stationEndDate) + ' min'" severity="danger" class="text-xs" />
+            </ng-container>
+            <ng-template #aTiempo>
+              <p-tag value="A tiempo" severity="success" class="text-xs" />
+            </ng-template>
+          </ng-container>
+        </td>
+        <td>
+          <p-tag 
+          [value]="getStatusLabel(product.workStatus)" 
+          [icon]="getStatusIcon(product.workStatus)" 
+          [severity]="getStatusSeverity(product.workStatus)" 
+          class="text-xs">
+        </p-tag>
+        </td>
+        <td>
+
+          <button pButton type="button" icon="pi pi-ellipsis-v" class="p-button-text p-button-plain"
+            (click)="openMenu($event, product)">
+          </button>
+        </td>
+
+
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+<p-confirmdialog [style]="{ width: '450px' }" />
+
+<p-menu #menu [popup]="true" [model]="currentMenuItems" appendTo="body"></p-menu>
+<p-dialog header="Motivo de rechazo" [(visible)]="showRejectDialog" [modal]="true" [style]="{ width: '450px' }">
+  <div class="p-fluid">
+    <label for="mensajeRechazo">Por favor, escribe el motivo del rechazo:</label>
+    <textarea pInputTextarea id="mensajeRechazo" [(ngModel)]="mensajeRechazo" rows="5" class="w-full mt-2"
+      autoResize></textarea>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" class="p-button-text" (onClick)="cancelarRechazo()" />
+    <p-button label="Rechazar" icon="pi pi-check" [disabled]="!mensajeRechazo?.trim()" (onClick)="confirmarRechazo()" />
+  </ng-template>
+</p-dialog>
+
+
+<p-dialog header="Motivo de bloqueo" [(visible)]="showBloqueoDialog" [modal]="true" [style]="{ width: '450px' }">
+  <div class="p-fluid">
+    <label for="mensajeBloqueo">Por favor, escribe el motivo del bloqueo:</label>
+    <textarea pInputTextarea id="mensajeBloqueo" [(ngModel)]="mensajeBloqueo" rows="5" class="w-full mt-2"
+      autoResize></textarea>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" class="p-button-text" (onClick)="cancelarRechazo()" />
+    <p-button label="Bloquear" icon="pi pi-check" [disabled]="!mensajeBloqueo?.trim()" (onClick)="confirmarBloqueo()" />
+  </ng-template>
+</p-dialog>
+
+<app-order-modal [showDialog]="showDialog" [isLabView]="true" [entity]="orderEntity"
+  (onClose)="showDialog = false"></app-order-modal>

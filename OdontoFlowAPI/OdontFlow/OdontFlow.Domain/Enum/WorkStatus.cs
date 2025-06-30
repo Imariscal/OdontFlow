@@ -1,0 +1,8 @@
+﻿public enum WORK_STATUS
+{
+    ESPERA = 1,
+    PROCESO,
+    TERMINADO,
+    BLOQUEADO,
+    RECHAZADO
+}

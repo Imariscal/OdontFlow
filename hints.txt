@@ -1,0 +1,78 @@
+docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=$dm1@1234!" -p 1433:1433 --name sqlserver -d mcr.microsoft.com/mssql/server:2022-latest
+
+
+"Server=localhost,1433;Database=OdontFlow;User Id=SA;Password=$dm1@1234!;TrustServerCertificate=True;"
+
+
+ dotnet ef migrations add updateOrderProcessDate --project OdontFlow.Persistence --context ReadOnlyContext
+
+ dotnet ef database update --project OdontFlow.Persistence --context ReadOnlyContext
+
+dotnet ef migration remove  AddWorkDaysWorkStationConfigurationv4 --project OdontFlow.Persistence --context ReadOnlyContext
+
+C:\bak\gammav2250923.bak
+
+docker cp "C:\Backups\OdontFlow0005.bak" sqlserver:/var/opt/mssql/backup/OdontFlowv1.bak
+
+docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $dm1@1234!
+
+dev01@yopmail.com
+G4mm@1234!
+
+
+administracion@gammadents.com
+G4mm@1234!
+laboratorio@gammadents.com
+G4mm@1234!
+
+666
+docker cp ec336a985668:/var/opt/mssql/data/OdontFlow06052025.bak C:/OdontFlow06052025.bak
+
+
+Vinka 
+
+ dotnet ef migrations add addRefreshToken --project Vinka.Persistence --context ReadOnlyContext
+
+ dotnet ef database update --project Vinka.Persistence --context ReadOnlyContext
+
+
+Usa esta contraseña de aplicación para iniciar sesión
+Escribe la contraseña de aplicación en el campo de contraseña de la aplicación o el dispositivo que no acepta códigos de seguridad. Si no sabes cómo actualizar tu aplicación o dispositivo con una contraseña de aplicación, sigue estos pasos.
+
+Contraseña de la aplicación
+jmnpgihtnrxylacu
+
+
+Por cada aplicación o dispositivo que no acepte códigos de seguridad, tienes que crear una nueva contraseña de aplicación para usarla en su lugar.
+
+Crear otra contraseña de aplicación
+
+
+
+
+
+
+
+
+
+
+
+
+
+63
+
+
++66666
+
+
+SmarterASP.net Home
+ImSolutions
+ing.mariscal.ignacio@gmail.com
+1012915Im
+
+Affiliate ID
+Bmtt252909
+ 
+
+8183428092
+ 

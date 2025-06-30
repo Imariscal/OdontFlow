@@ -1,0 +1,174 @@
+<div class="grid grid-cols-12 gap-8">
+    <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+        <div class="card mb-0">
+            <div class="flex justify-between mb-4">
+                <div>
+                    <span class="block text-muted-color font-medium mb-4">TODOS</span>
+                    <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{summary?.totalTrabajos ??
+                        0}}</div>
+                </div>
+                <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border"
+                    style="width: 2.5rem; height: 2.5rem">
+                    <i class="pi pi-warehouse text-blue-500 !text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+        <div class="card mb-0">
+            <div class="flex justify-between mb-4">
+                <div>
+                    <span class="block text-muted-color font-medium mb-4">EN ESPERA</span>
+                    <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{summary?.trabajosEnEspera ??
+                        0}}</div>
+                </div>
+                <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border"
+                    style="width: 2.5rem; height: 2.5rem">
+                    <i class="pi pi-warehouse text-blue-500 !text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+        <div class="card mb-0">
+            <div class="flex justify-between mb-4">
+                <div>
+                    <span class="block text-muted-color font-medium mb-4">EN PROCESO</span>
+                    <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{summary?.trabajosEnProceso
+                        ?? 0}}</div>
+                </div>
+                <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border"
+                    style="width: 2.5rem; height: 2.5rem">
+                    <i class="pi pi-warehouse text-blue-500 !text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+        <div class="card mb-0">
+            <div class="flex justify-between mb-4">
+                <div>
+                    <span class="block text-muted-color font-medium mb-4">TERMINADOS</span>
+                    <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{summary?.trabajosTerminados
+                        ?? 0}}</div>
+                </div>
+                <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border"
+                    style="width: 2.5rem; height: 2.5rem">
+                    <i class="pi pi-warehouse text-blue-500 !text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-12 gap-8 mt-5">
+    <!-- <div class="col-span-12 lg:col-span-2 xl:col-span-2">
+        <div class="card mb-0">
+            <div class="flex justify-between mb-4">
+                <div>
+                    <span class="block text-muted-color font-medium mb-4">BLOQUEADOS</span>
+                    <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{summary?.trabajosBloqueados
+                        ?? 0}}</div>
+                </div>
+                <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border"
+                    style="width: 2.5rem; height: 2.5rem">
+                    <i class="pi pi-warehouse text-blue-500 !text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+    <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+        <div class="card mb-0">
+            <div class="flex justify-between mb-4">
+                <div>
+                    <span class="block text-muted-color font-medium mb-4">BLOQUEADOS / RECHAZADOS</span>
+                    <div class="text-surface-900 dark:text-surface-0 font-medium text-xl"> {{summary?.trabajosBloqueados ?? 0}}  / {{summary?.trabajosRechazados ?? 0}}</div>
+                </div>
+                <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border"
+                    style="width: 2.5rem; height: 2.5rem">
+                    <i class="pi pi-warehouse text-blue-500 !text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+        <div class="card mb-0">
+            <div class="flex justify-between mb-4">
+                <div>
+                    <span class="block text-muted-color font-medium mb-4">EN TIEMPO</span>
+                    <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{summary?.trabajosEnTiempo ??
+                        0}}</div>
+                </div>
+                <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border"
+                    style="width: 2.5rem; height: 2.5rem">
+                    <i class="pi pi-warehouse text-blue-500 !text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+        <div class="card mb-0">
+            <div class="flex justify-between mb-4">
+                <div>
+                    <span class="block text-muted-color font-medium mb-4">CON ALARMA</span>
+                    <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{summary?.trabajosConAlarma
+                        ?? 0}}</div>
+                </div>
+                <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border"
+                    style="width: 2.5rem; height: 2.5rem">
+                    <i class="pi pi-warehouse text-blue-500 !text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+        <div class="card mb-0">
+            <div class="flex justify-between mb-4">
+                <div>
+                    <span class="block text-muted-color font-medium mb-4">CON RETRASO</span>
+                    <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{summary?.trabajosConRetraso
+                        ?? 0}}</div>
+                </div>
+                <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border"
+                    style="width: 2.5rem; height: 2.5rem">
+                    <i class="pi pi-warehouse text-blue-500 !text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-12 gap-4 mt-8">
+    <div class="col-span-12 md:col-span-6">
+      <p-card>
+        <h3 class="text-md font-semibold text-center">Resumen Diario General</h3>
+        <p-chart  type="bar"  [data]="barChartDataGeneral" [options]="barChartOptions" style="height: 200px"></p-chart>
+      </p-card>
+    </div>
+  
+    <div class="col-span-12 md:col-span-6">
+      <p-card>
+        <h3 class="text-md font-semibold text-center">Resumen Diario por Estación</h3>
+        <p-chart type="line" [data]="barChartDataByStation" [options]="barChartOptions" style="height: 200px"></p-chart>
+      </p-card>
+    </div>
+  </div>
+
+
+<div class="col-span-12 xl:col-span-12 mt-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <p-card *ngFor="let station of summary?.porEstacion" (click)="onStationChartClick(station.stationId)">
+        <h3 class="text-md font-semibold text-center">{{ station.stationName }}</h3>
+        <p-chart type="doughnut" [data]="buildDonutData(station)" [options]="donutChartOptions" style="height: 250px"></p-chart>
+        <div class="text-center text-sm mt-2">
+          Total: {{ station.trabajosEnTiempo + station.trabajosConAlarma + station.trabajosConRetraso  + station.trabajosBloqueados  }} trabajos
+        </div>
+      </p-card>
+    </div>
+</div>
+ 

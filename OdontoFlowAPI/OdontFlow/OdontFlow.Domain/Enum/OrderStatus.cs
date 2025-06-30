@@ -1,0 +1,9 @@
+﻿public enum ORDER_STATUS
+{
+    CREADO = 1,
+    CONFIRMADA,
+    EN_PROCESO, 
+    TERMINADO, 
+    ENTREGADO,
+    PAGADO
+}

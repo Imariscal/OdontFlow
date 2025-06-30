@@ -1,0 +1,72 @@
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+    </ng-template>
+
+    <ng-template #end>
+        <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+    </ng-template>
+</p-toolbar>
+
+
+<div class="grid grid-cols-12 gap-4 mt-8">
+    <div class="col-span-12  ">
+        <p-card>
+            <p-table #dt [value]="entities()" [rows]="10" [columns]="cols" [paginator]="true"
+                [globalFilterFields]="['name', 'status']" [tableStyle]="{ 'min-width': '75rem' }" [(selection)]="emtitiesSelected"
+                [rowHover]="true" dataKey="id" [globalFilterFields]="['name', 'price']"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} records" [showCurrentPageReport]="true"
+                [rowsPerPageOptions]="[10, 20, 30]">
+                <ng-template #caption>
+                    <div class="flex items-center justify-between">
+                        <p-button label="Clear" [outlined]="true" icon="pi pi-filter-slash" (click)="clear(dt)" />
+                        <h5 class="m-0">Detalle Estaciones</h5>
+                        <p-iconfield>
+                            <p-inputicon styleClass="pi pi-search" />
+                            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+                        </p-iconfield>
+                    </div>
+                </ng-template>
+                <ng-template #header>
+                    <tr>
+                        <th pSortableColumn="name" style="min-width:16rem">
+                            Nombre
+                            <p-sortIcon field="name" />
+                            <p-columnFilter type="text" field="name" display="menu" />
+                        </th>
+                        <th pSortableColumn="days" style="min-width: 8rem">
+                            Dias
+                            <p-sortIcon field="days" />
+                            <p-columnFilter type="numeric" field="price" display="menu" currency="USD" />
+                        </th>
+                
+                        <th pSortableColumn="active" style="min-width: 12rem">
+                            Activo
+                            <p-sortIcon field="active" />
+                        </th>
+                        <th style="min-width: 5rem"></th>
+                    </tr>
+                </ng-template>
+                <ng-template #body let-product>
+                    <tr>
+                        <td style="min-width: 16rem">
+                            <strong>{{ product.name }} </strong></td>
+                        <td>{{ product.days  }}</td> 
+                        <td>{{ product.active ? "SI" : "NO" }}</td>
+                        <td>
+                            <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true"
+                                (click)="editEntity(product)" />
+                            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
+                                (click)="deleteEntity(product)" />
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-card>
+    </div>
+</div>
+
+<app-workstation-modal [showDialog]="showDialog" [entity]="entity" (onClose)="onClose()"
+    (onSave)="onSave($event)"></app-workstation-modal>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

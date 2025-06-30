@@ -1,0 +1,215 @@
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <div class="w-full flex justify-start gap-2">
+      <p-button label="Filtros Avanzados" icon="pi pi-sliders-h"
+        (click)="advancedFiltersVisible = !advancedFiltersVisible" />
+      <h5 class="m-0 ml-4">Reporte de Pagos Recibidos</h5>
+    </div>
+  </ng-template>
+  <ng-template #end>
+    <p-button label="Exportar" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
+  </ng-template>
+</p-toolbar>
+
+<!-- Filtros Avanzados -->
+<p-panel [toggleable]="true" [collapsed]="!advancedFiltersVisible" [style]="{ 'margin-bottom': '2rem' }"
+  header="Filtros de búsqueda">
+  <div class="grid grid-cols-12 gap-4 items-end">
+    <div class="col-span-12 md:col-span-3">
+      <label class="block font-bold mb-1">Buscar por orden, cliente o paciente</label>
+      <input pInputText [(ngModel)]="filters.search" class="w-full" />
+    </div>
+
+    <div class="col-span-12 md:col-span-2">
+      <label class="block font-bold mb-1">Tipo de Pago</label>
+      <p-dropdown [options]="paymentTypeOptions" [(ngModel)]="filters.paymentTypeId" optionLabel="label"
+        optionValue="value" placeholder="Selecciona" class="w-full" />
+    </div>
+
+    <div class="col-span-12 md:col-span-2">
+      <label class="block font-bold mb-1">Grupo</label>
+      <p-dropdown [options]="groupOptions" [(ngModel)]="filters.groupId" optionLabel="label" optionValue="value"
+        placeholder="Selecciona" class="w-full" />
+    </div>
+
+    <div class="col-span-12 md:col-span-2">
+      <label class="block font-bold mb-1">Fecha Pago (Inicio)</label>
+      <p-datepicker [(ngModel)]="filters.creationDateStart" dateFormat="dd/mm/yy" appendTo="body"
+        [iconDisplay]="'input'" [showIcon]="true" fluid />
+    </div>
+
+    <div class="col-span-12 md:col-span-2">
+      <label class="block font-bold mb-1">Fecha Pago (Fin)</label>
+      <p-datepicker [(ngModel)]="filters.creationDateEnd" dateFormat="dd/mm/yy" appendTo="body" [iconDisplay]="'input'"
+        [showIcon]="true" fluid />
+    </div>
+
+    <div class="col-span-12 md:col-span-1 flex justify-end">
+      <p-button icon="pi pi-search" label="Buscar" (onClick)="search()"
+        styleClass="p-button-success w-full md:w-auto" />
+    </div>
+
+    <div class="col-span-12 md:col-span-1 flex justify-start">
+      <p-button icon="pi pi-refresh" label="Limpiar" (onClick)="clearFilters()" severity="secondary" [outlined]="true"
+        styleClass="w-full md:w-auto" />
+    </div>
+  </div>
+</p-panel>
+
+<!-- Indicadores -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+  <div class="relative flex flex-col p-4 border rounded-lg shadow-md bg-white">
+    <div class="text-gray-500  font-bold text-sm">Cantidad de Pagos</div>
+    <div class="text-2xl font-bold text-gray-800 mt-2">{{ indicators.totalPayments }}</div>
+  </div>
+
+  <div class="relative flex flex-col p-4 border rounded-lg shadow-md bg-white">
+    <div class="text-gray-500 font-bold text-sm">Monto Total Pagado</div>
+    <div class="text-2xl font-bold text-green-600 mt-2">{{ indicators.totalAmount | currency }} </div>
+  </div>
+
+  <div *ngFor="let indicator of paymentTypeIndicators"
+    class="relative flex flex-col p-4 border rounded-lg shadow-md bg-white">
+    <div class="text-sm font-semibold" [ngClass]="getPaymentCardClass(indicator.label)">{{ indicator.label }}</div>
+    <div class="text-xl font-bold mt-2">{{ indicator.count }} pagos - {{ indicator.amount | currency }} </div>
+  </div>
+</div>
+
+<!-- Tabla de Pagos -->
+<div class="grid grid-cols-12 gap-4 mt-8">
+  <div class="col-span-12  ">
+    <p-card>
+      <p-table #dt [value]="payments" 
+      scrollable="true"
+      [scrollHeight]="scrollHeight" 
+      [paginator]="true" [rows]="50" sortField="workGroup" sortMode="single"
+        [rowsPerPageOptions]="[50, 100, 150]" [rowHover]="true" dataKey="barcode" rowGroupMode="rowspan"
+        groupRowsBy="workGroup" [globalFilterFields]="['barcode', 'clientName', 'patientName', 'paymentType']">
+
+        <ng-template #header>
+          <tr>
+            <!-- <th pFrozenColumn></th> -->
+            <th pSortableColumn="workGroup">Grupo <p-sortIcon field="workGroup" /></th>
+            <th pSortableColumn="barcode">Orden <p-sortIcon field="barcode" /></th>
+            <th pSortableColumn="paymentComplete">Orden Pagada <p-sortIcon field="paymentComplete" /></th>
+            <th pSortableColumn="paymentComplete">Fecha Pago Total<p-sortIcon field="paymentCompleteDate" /></th>
+            <th pSortableColumn="clientName">Cliente <p-sortIcon field="clientName" /></th>
+            <th pSortableColumn="patientName">Paciente <p-sortIcon field="patientName" /></th>
+            <th pSortableColumn="paymentType">Método de Pago <p-sortIcon field="paymentType" /></th>
+            <th>Referencia</th>
+            <th pSortableColumn="paymentDate">Fecha de Pago <p-sortIcon field="paymentDate" /></th>
+            <th pSortableColumn="amount">Monto <p-sortIcon field="amount" /></th>
+          </tr>
+        </ng-template>
+
+        <ng-template #body let-payment let-rowIndex="rowIndex" let-expanded="expanded">
+          <tr>
+            <!-- <td pFrozenColumn>
+        <p-button type="button" pRipple [pRowToggler]="payment" [text]="true" [rounded]="true" [plain]="true"
+          [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'">
+        </p-button>
+      </td> -->
+            <!-- Columna Grupo (con rowspan) -->
+            <td>
+              <span class="font-bold">{{ payment.workGroup }}</span>
+            </td>
+
+            <!-- Columna Orden (con rowspan) -->
+            <td>
+              <p-button label="{{ payment.barcode }}" class="p-0" styleClass="p-button-link text-green-600"
+                (onClick)="openOrderModal(payment.order)"></p-button>
+            </td>
+            <!-- Columna Orden (con rowspan) -->
+            <td>
+              <p-tag [value]="payment.paymentComplete ? 'Sí' : 'No'"
+                [severity]="payment.paymentComplete ? 'success' : 'warn'"></p-tag>
+            </td>
+            <!-- Columna Orden (con rowspan) -->
+            <td>
+              {{ payment.paymentComplete ? ( payment.paymentCompleteDate | date : 'dd/MM/yyyy'): '' }}
+            </td>
+            <!-- Columna Cliente (con rowspan) -->
+            <td>
+              {{ payment.clientName }}
+            </td>
+            <!-- Columna Paciente (con rowspan) -->
+            <td>
+              {{ payment.patientName }}
+            </td>
+            <!-- Columna Método de Pago (con rowspan) -->
+            <td>
+              <span [ngClass]="getPaymentCardClass(payment.paymentType)">{{ payment.paymentType }}</span>
+            </td>
+            <!-- Columna Referencia (sin rowspan) -->
+            <td>
+              {{ payment.reference }}
+            </td>
+            <!-- Columna Fecha de Pago (sin rowspan) -->
+            <td>
+              {{ payment.paymentDate | date:'dd/MM/yyyy' }}
+            </td>
+
+            <!-- Columna Monto (sin rowspan) -->
+            <td>
+              <strong>{{ payment.amount | currency }}</strong>
+            </td>
+          </tr>
+
+        </ng-template>
+
+        <!-- Expansión de Productos -->
+        <ng-template #expandedrow let-payment>
+          <tr>
+            <td [attr.colspan]="6">
+              <div class="p-4">
+                <h3 class="mb-3 font-bold text-sm text-gray-900">Productos relacionados</h3>
+
+                <p-table [value]="payment.order.items" [tableStyle]="{ 'min-width': '60rem' }">
+                  <ng-template pTemplate="header">
+          <tr>
+            <th>Cantidad</th>
+            <th>Producto</th>
+            <th>Piezas</th>
+            <th>Costo Unitario</th>
+            <th>IVA Unitario</th>
+            <th>Subtotal</th>
+            <th>IVA Total</th>
+            <th>Total</th>
+            <th>Factura</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item>
+          <tr>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.productName }}</td>
+            <td>{{ item.teethNames }}</td>
+            <td><strong>{{ item.unitCost | currency }}</strong></td>
+            <td><strong>{{ item.unitTax | currency }}</strong></td>
+            <td><strong>{{ (item.unitCost * item.quantity) | currency }}</strong></td>
+            <td><strong>{{ (item.unitTax * item.quantity) | currency }}</strong></td>
+            <td><strong>{{ item.totalCost | currency }}</strong></td>
+            <td>
+              <p-tag [value]="item.order.applyInvoice ? 'Sí' : 'No'"
+                [severity]="item.order.applyInvoice ? 'success' : 'warn'"></p-tag>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="9" class="text-center">No hay productos para esta orden.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+  </div>
+  </td>
+  </tr>
+  </ng-template>
+
+  </p-table>
+  </p-card>
+
+</div>
+</div>
+
+<app-order-modal [showDialog]="showDialog" *ngIf="this.orderEntity" [entity]="this.orderEntity"
+  (onClose)="showDialog = false"></app-order-modal>

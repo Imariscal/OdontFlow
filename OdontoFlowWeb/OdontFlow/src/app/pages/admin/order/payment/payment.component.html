@@ -1,0 +1,96 @@
+<div class="grid grid-cols-12 gap-6">
+    <div class="col-span-12 ">
+        <form [formGroup]="form" class="p-fluid">
+            <div class="grid grid-cols-12 gap-6 mt-3">
+                <div class="col-span-4">
+                    <label class="block font-bold mb-1" for="paymentTypeId">Forma de Pago</label>
+                    <p-dropdown formControlName="paymentTypeId" [options]="paymentTypes" optionLabel="label"
+                        optionValue="value" placeholder="Selecciona forma de pago" fluid inputId="paymentTypeId"
+                        [showClear]="true" [filter]="true"></p-dropdown>
+                </div>
+            </div>
+            <div class="grid grid-cols-12 gap-6  mt-3">
+                <div class="col-span-4">
+                    <label class="block font-bold mb-1" for="amount">Cantidad</label>
+                    <p-inputNumber id="amount" formControlName="amount" 
+                    [disabled]="getRemainingAmount() <= 0"
+                    mode="currency" currency="MXN" locale="es-MX" fluid />
+            
+                      
+                      <small class="text-red-500" *ngIf="form.get('amount')?.hasError('exceedsRemaining')">
+                        El monto excede el saldo restante.
+                      </small>
+                </div>
+            </div>
+            <div class="grid grid-cols-12 gap-6  mt-3">
+                <div class="col-span-4">
+                    <label class="block font-bold mb-1" for="reference">Referencia</label>
+                    <input pInputText type="text" formControlName="reference" fluid id="reference"
+                        placeholder="Referencia (si aplica)" />
+                </div>
+            </div>
+            <div class="grid grid-cols-12 gap-6  mt-3">
+                <div class="col-span-6 gap-2  justify-between">
+                    <button pButton label="Guardar" icon="pi pi-save" 
+                    (click)="submitForm()" 
+                    [disabled]="getRemainingAmount() <= 0 || form.invalid"
+                    class="p-button-success mr-2">
+            </button>
+                    <p-button label="Limpiar" icon="pi pi-times" severity="secondary" (onClick)="form.reset()" />
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-span-12">
+
+        <p-table #dt [value]="payments()" [rows]="10" [columns]="cols" [paginator]="true"
+            [globalFilterFields]="['name', 'status']" [tableStyle]="{ 'min-width': '75rem' }" [rowHover]="true"
+            dataKey="id" [globalFilterFields]="['name', 'price']"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} records"
+            [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 20, 30]">
+                   <ng-template #header>
+                <tr>
+                    <th pSortableColumn="paymentType">
+                        Forma de pago
+                        <p-sortIcon field="paymentType" />
+                        <p-columnFilter type="text" field="paymentType" display="menu" />
+                    </th>
+                    <th pSortableColumn="amount">
+                        Cantidad
+                        <p-sortIcon field="amount" />
+                        <p-columnFilter type="numeric" field="amount" display="menu" currency="USD" />
+                    </th>
+                    <th pSortableColumn="reference">
+                        Referencia
+                        <p-sortIcon field="reference" />
+                        <p-columnFilter type="text" field="reference" display="menu" />
+                    </th>
+                    <th pSortableColumn="creationDate">
+                        Fecha Pago
+                        <p-sortIcon field="creationDate" />
+                        <p-columnFilter type="date" field="creationDate" display="menu" />
+                    </th>
+
+                    <th style="min-width: 5rem"></th>
+                </tr>
+            </ng-template>
+            <ng-template #body let-product>
+                <tr>
+                    <td style="max-width: 1rem">{{ product.paymentType }}</td>
+                    <td style="max-width: 1rem">{{ product.amount | currency: 'USD' : 'symbol' }}</td>
+                    <td style="max-width: 1rem">{{ product.reference }}</td>
+                    <td style="max-width: 1rem">{{ product.creationDate | date: 'dd/MM/yyy' }}</td>
+                    <td style="max-width: 1rem">
+                        <button  pButton icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true"
+                            (click)="editEntity(product)" >      </button>
+                        <button  pButton type="button" icon="pi pi-trash" severity="danger" 
+                            [rounded]="true" [outlined]="true" 
+                            (click)="deleteEntity(product)">
+                        </button>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>
+

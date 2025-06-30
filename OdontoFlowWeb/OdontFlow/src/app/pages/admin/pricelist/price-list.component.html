@@ -1,0 +1,103 @@
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <div class="w-full flex justify-center">
+            <h5 class="m-0">Detalle de Precio Lista</h5>
+          </div>       
+    </ng-template>
+    <ng-template #center>    
+    </ng-template>
+    <ng-template #end>
+        <p-button label="Nuevo" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+    </ng-template>
+</p-toolbar>
+
+<div class="grid grid-cols-12 gap-4 mt-8">
+    <div class="col-span-12  ">
+        <p-card>
+            <p-table #dt [value]="entities()" [rows]="10" [columns]="cols" [paginator]="true"
+                [globalFilterFields]="['name']" 
+                scrollable="true"
+                [scrollHeight]="scrollHeight"
+                [(selection)]="selectedEntities" [rowHover]="true" dataKey="id"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entities"
+                [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 20, 30]">
+                <ng-template #caption>
+                    <div class="flex items-center justify-between">
+                        <p-button label="Borrar Filtros" [outlined]="true" icon="pi pi-filter-slash"
+                            (click)="clear(dt)" />
+
+                        <p-iconfield>
+                            <p-inputicon styleClass="pi pi-search" />
+                            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)"
+                                placeholder="Search..." />
+                        </p-iconfield>
+                    </div>
+                </ng-template>
+                <ng-template #header>
+                    <tr> 
+                        <th pSortableColumn="name" style="min-width:16rem">
+                            Nombre
+                            <p-sortIcon field="name" />
+                            <p-columnFilter type="text" field="name" display="menu" />
+                        </th>
+                        <th pSortableColumn="category" style="min-width: 8rem">
+                            Categoria
+                            <p-sortIcon field="category" />
+                            <p-columnFilter field="category" matchMode="equals" display="menu" type="custom">
+                                <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                    <p-dropdown [options]="categories" [ngModel]="value"
+                                        (onChange)="filter($event.value)" placeholder="Seleccione categoría"
+                                        class="w-full" optionLabel="label" optionValue="value"></p-dropdown>
+                                </ng-template>
+                            </p-columnFilter>
+                        </th>
+                        <th pSortableColumn="discount" style="min-width:10rem">
+                            Descuento
+                            <p-sortIcon field="discount" />
+                            <p-columnFilter type="numeric" field="discount" display="menu" currency="USD" />
+                        </th>
+                        <th pSortableColumn="active" style="min-width: 12rem">
+                            Activo
+                            <p-sortIcon field="active" />
+                            <p-columnFilter field="active" matchMode="equals" display="menu">
+                                <ng-template #filter let-value let-filter="filterCallback">
+                                    <p-select [ngModel]="value" [options]="activo" (onChange)="filter($event.value)" placeholder="Select One" styleClass="w-full">
+                                        <ng-template let-option #item>
+                                            <p-tag [value]="option.value ? 'Sí' : 'No'" [severity]="option.value  ? 'success' : 'warn'"></p-tag>
+                                        </ng-template>
+                                    </p-select>
+                                </ng-template>
+                            </p-columnFilter>
+                        </th>
+
+                        <th style="min-width: 12rem"></th>
+                    </tr>
+                </ng-template>
+                <ng-template #body let-entity>
+                    <tr> 
+                        <td style="min-width: 16rem"> <strong>{{ entity.name }} </strong></td>
+
+                        <td>  <p-tag [value]="entity.category"
+                            [severity]="entity.category == 'GAMMA' ? 'info' : 'success'"> </p-tag></td>
+                        <td>{{ entity.discount }}%</td>
+                        <td> <p-tag [value]="entity.active ? 'Sí' : 'No'"
+                            [severity]="entity.active ? 'success' : 'warn'"></p-tag></td>
+                        <td>
+                   
+                            <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true"
+                                (click)="editEntity(entity)" />
+                            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
+                                (click)="deleteEntity(entity)" />
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-card>
+    </div>
+</div>
+
+<app-pricelist-modal  [showDialog]="showDialog" 
+[entity]="entity" (onClose)="onClose()"
+    (onSave)="onSave($event)"></app-pricelist-modal>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

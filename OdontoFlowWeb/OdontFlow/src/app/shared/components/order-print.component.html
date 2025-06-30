@@ -1,0 +1,14 @@
+<div class="print-container">
+    <h2>Detalles de la Orden: {{ orderData?.folio }}</h2>
+    <p><strong>Paciente:</strong> {{ orderData?.paciente }}</p>
+    <p><strong>Dr.:</strong> {{ orderData?.doctor }}</p>
+    <p><strong>Fecha Alta:</strong> {{ orderData?.fechaAlta  }}</p>
+    <p><strong>Fecha Compromiso:</strong> {{ orderData?.fechaCompromiso   }}</p>
+    <p><strong>Productos:</strong> {{ orderData?.producto }}</p>
+    <p><strong>Color:</strong> {{ orderData?.color }}</p>
+    <p><strong>Fase:</strong> {{ orderData?.fase }}</p>
+    <p><strong>Observaciones:</strong> {{ orderData?.observaciones }}</p>
+  
+    <button class="no-print" (click)="print()">🖨️ Imprimir</button>
+  </div>
+  

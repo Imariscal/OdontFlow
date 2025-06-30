@@ -1,0 +1,70 @@
+<p-dialog [(visible)]="showDialog" [style]="{ width: '650px' }" [closeOnEscape]="false" (onHide)="closeClick()"
+  header="Detalles de Usuario" [modal]="true">
+  <form [formGroup]="form" class="p-fluid">
+    <div class="grid grid-cols-12 gap-4">
+
+      <!-- Rol -->
+      <div class="col-span-12">
+        <label class="font-semibold block mb-2">Role <small class="text-red-500">*</small></label>
+        <p-dropdown [options]="roles" optionLabel="name" optionValue="id" [showClear]="true" [filter]="true"
+          filterBy="name" appendTo="body" formControlName="roleId" placeholder="Selecciona un empleado"
+          class="w-full" />
+      </div>
+
+      <!-- Empleado -->
+      <div class="col-span-12">
+        <label class="font-semibold block mb-2">Empleado</label>
+        <p-dropdown [options]="employees" optionLabel="name" optionValue="id" [showClear]="true" [filter]="true"
+          filterBy="name" appendTo="body" formControlName="employeeId" placeholder="Selecciona un empleado"
+          class="w-full" />
+      </div>
+
+      <!-- cliente -->
+      <div class="col-span-12">
+        <label class="font-semibold block mb-2">Cliente</label>
+        <p-autocomplete inputId="clientId" (onSelect)="onClientSelected($event)"
+          [ngClass]="client?.errors && (client?.touched || client?.dirty) ? 'ng-invalid ng-dirty' : ''"
+          formControlName="clientId" fluid optionLabel="name" optionValue="id" appendTo="body"
+          [suggestions]="filteredClients" (completeMethod)="filterClients($event)">
+          <ng-template let-employe #item>
+            <div class="flex items-center gap-2">{{ employe.name }}</div>
+          </ng-template>
+          <ng-template #header>
+            <div class="font-medium px-3 py-2">Clientes Disponibles</div>
+          </ng-template>
+
+          <ng-template pTemplate="empty">
+            <div class="px-3 py-2 text-gray-500">Sin resultados o sin disponibles.</div>
+          </ng-template>
+        </p-autocomplete>
+      </div>
+
+      <!-- Email -->
+      <div class="col-span-12">
+        <label for="email" class="font-semibold block mb-2">Correo <small class="text-red-500">*</small></label>
+        <input id="email" type="email" pInputText formControlName="email"
+          [ngClass]="{ 'ng-invalid ng-dirty': email?.errors && (email?.touched || email?.dirty) }" class="w-full" />
+        <small class="text-red-500" *ngIf="email?.errors && (email?.touched || email?.dirty)">
+          <ng-container *ngIf="email?.hasError('required')">Este campo es obligatorio.</ng-container>
+          <ng-container *ngIf="email?.hasError('email')">Introducir un correo válido.</ng-container>
+        </small>
+      </div>
+
+      <!-- Cambiar contraseña y Activo -->
+      <div class="col-span-6 flex items-center gap-2">
+        <p-checkbox formControlName="changePassword" [binary]="true" inputId="changePassword" />
+        <label for="changePassword">Cambiar Password</label>
+      </div>
+
+      <div class="col-span-6 flex items-center gap-2">
+        <label for="active" class="font-semibold">Activo:</label>
+        <p-toggleswitch formControlName="active" />
+      </div>
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <p-button label="Cancelar" icon="pi pi-times" text (click)="closeClick()" />
+    <p-button label="Guardar" icon="pi pi-check" [disabled]="!form.valid" (click)="saveClick()" />
+  </ng-template>
+</p-dialog>

@@ -1,0 +1,5 @@
+﻿public enum CLIENT_STATUS
+{
+    SERVICIO_ACTIVO = 1,
+    SIN_SERVICIO
+}
